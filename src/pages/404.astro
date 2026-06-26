@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+---
+<BaseLayout title="Not found" description="Page not found.">
+  <Container>
+    <h1>404</h1>
+    <p class="lede">That page doesn't exist.</p>
+    <p><a href="/">← Back home</a></p>
+  </Container>
+</BaseLayout>
+<style>.lede { color: var(--muted); }</style>
