@@ -1,0 +1,53 @@
+backend:
+  name: github
+  repo: Simoon896/simonkuester.com
+  branch: main
+  base_url: https://REPLACE-WITH-OAUTH-WORKER.workers.dev
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "posts"
+    label: "Writing"
+    folder: "src/content/posts"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    fields:
+      - { name: "title", label: "Title", widget: "string" }
+      - { name: "date", label: "Date", widget: "datetime", picker_utc: false }
+      - { name: "summary", label: "Summary", widget: "text" }
+      - { name: "tags", label: "Tags", widget: "list", default: [], required: false }
+      - { name: "coverImage", label: "Cover image", widget: "image", required: false }
+      - { name: "draft", label: "Draft", widget: "boolean", default: false }
+      - { name: "body", label: "Body", widget: "markdown" }
+
+  - name: "projects"
+    label: "Projects"
+    folder: "src/content/projects"
+    create: true
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    fields:
+      - { name: "title", label: "Title", widget: "string" }
+      - { name: "role", label: "Your role", widget: "string" }
+      - { name: "period", label: "Period", widget: "string", hint: "e.g. 2024-2025" }
+      - { name: "tools", label: "Tools", widget: "list", default: [] }
+      - { name: "summary", label: "Summary", widget: "text", hint: "Lead with problem + outcome" }
+      - name: "links"
+        label: "Links"
+        widget: "list"
+        required: false
+        fields:
+          - { name: "label", label: "Label", widget: "string" }
+          - { name: "url", label: "URL", widget: "string" }
+      - { name: "coverImage", label: "Cover image", widget: "image", required: false }
+      - { name: "featured", label: "Featured on home", widget: "boolean", default: false }
+      - { name: "order", label: "Sort order", widget: "number", default: 0, value_type: "int" }
+      - name: "body"
+        label: "Case study"
+        widget: "markdown"
+        hint: "Use ## Challenge, ## Contribution, ## Key decisions, ## Outcome"
