@@ -1,3 +1,37 @@
 ---
+import ThemeToggle from './ThemeToggle.astro';
+const path = Astro.url.pathname;
+const items = [
+  { href: '/', label: 'Home' },
+  { href: '/about/', label: 'About' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/writing/', label: 'Writing' },
+  { href: '/contact/', label: 'Contact' },
+];
+const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
 ---
-<header><nav aria-label="Primary"><a href="/">Simon Kuester</a></nav></header>
+<header class="site-header">
+  <a class="wordmark" href="/">Simon Kuester</a>
+  <nav aria-label="Primary">
+    <ul>
+      {items.map((i) => (
+        <li><a href={i.href} aria-current={isActive(i.href) ? 'page' : undefined}>{i.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+  <ThemeToggle />
+</header>
+<style>
+  .site-header {
+    display: flex; align-items: center; gap: var(--space-4);
+    max-width: var(--maxw-page); margin-inline: auto;
+    padding: var(--space-3); border-bottom: 1px solid var(--hairline);
+    flex-wrap: wrap;
+  }
+  .wordmark { font-family: var(--font-serif); font-size: 1.15rem; color: var(--ink); }
+  nav { margin-inline-start: auto; }
+  nav ul { display: flex; gap: var(--space-3); list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+  nav a { color: var(--muted); font-size: 0.95rem; }
+  nav a[aria-current='page'] { color: var(--ink); font-weight: 500; }
+  nav a:hover { color: var(--accent); }
+</style>
