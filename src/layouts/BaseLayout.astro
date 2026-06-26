@@ -22,7 +22,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
 ---
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,10 +44,7 @@ const ogImage = new URL(image, Astro.site);
     <script is:inline>
       (() => {
         const saved = localStorage.getItem('theme');
-        const theme = saved
-          ? saved
-          : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
       })();
     </script>
   </head>
