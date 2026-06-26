@@ -1,5 +1,9 @@
 # Dependencies
 node_modules/
+# Not committed: an npm lockfile generated on Windows omits Linux-only optional
+# native/WASM deps (e.g. @emnapi/*), which breaks Cloudflare's `npm ci`. Without a
+# committed lockfile, Cloudflare uses `npm install` and resolves Linux deps correctly.
+package-lock.json
 
 # Build output
 dist/
