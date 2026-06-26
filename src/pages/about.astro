@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+
+const focus = ['Application security', 'Detection engineering', 'Cloud security', 'Security tooling'];
+const experience = [
+  { period: '2024–present', role: 'Security Engineer', org: 'Placeholder Co.', note: 'Application & cloud security; built internal tooling.' },
+  { period: '2021–2024', role: 'Security Analyst', org: 'Placeholder Inc.', note: 'Detection engineering and incident response.' },
+];
+---
+<BaseLayout title="About" description="About Simon Kuester — background, focus areas, and experience.">
+  <Container>
+    <h1>About</h1>
+    <p class="lede">I'm a cybersecurity professional focused on making complex risk
+      understandable and building tools that make secure the default.</p>
+
+    <h2>Focus areas</h2>
+    <ul class="focus">{focus.map((f) => <li>{f}</li>)}</ul>
+
+    <h2>Experience</h2>
+    <ul class="timeline">
+      {experience.map((e) => (
+        <li>
+          <p class="meta">{e.period}</p>
+          <p class="role"><strong>{e.role}</strong> · {e.org}</p>
+          <p>{e.note}</p>
+        </li>
+      ))}
+    </ul>
+
+    <p><a class="btn" href="/resume.pdf">Download résumé (PDF)</a></p>
+  </Container>
+</BaseLayout>
+
+<style>
+  .lede { font-size: 1.2rem; color: var(--muted); }
+  .focus { display: flex; gap: var(--space-2); flex-wrap: wrap; list-style: none; padding: 0; }
+  .focus li { border: 1px solid var(--hairline); border-radius: 999px; padding: 0.2rem 0.7rem; font-size: 0.85rem; }
+  .timeline { list-style: none; padding: 0; }
+  .timeline li { border-left: 2px solid var(--hairline); padding: 0 0 var(--space-4) var(--space-3); }
+  .timeline .role { margin: 0.1rem 0; }
+  .btn { display: inline-block; background: var(--accent); color: var(--accent-contrast); padding: 0.6rem 1.2rem; border-radius: 8px; }
+  .btn:hover { text-decoration: none; opacity: 0.92; }
+</style>
