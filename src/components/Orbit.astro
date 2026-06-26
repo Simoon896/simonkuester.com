@@ -1,0 +1,76 @@
+---
+interface Item { image: string; caption: string; link?: string; }
+interface Props { items: Item[]; }
+const { items } = Astro.props;
+---
+<div class="orbit" data-orbit>
+  {items.map((it) => (
+    <a class="orbit-card" href={it.link ?? '#'} aria-label={it.caption}>
+      <img src={it.image} alt={it.caption} width="116" height="146" loading="lazy" />
+      <span class="orbit-cap">{it.caption}</span>
+    </a>
+  ))}
+</div>
+
+<style>
+  /* default = calm static gallery (mobile / no-JS / reduced-motion) */
+  .orbit { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); max-width: 720px; margin: var(--space-5) auto 0; }
+  .orbit-card { position: relative; width: 116px; height: 146px; border-radius: 10px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08); box-shadow: 0 14px 40px rgba(0,0,0,.45); }
+  .orbit-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .orbit-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 7px 9px; font-size: 11px;
+    color: var(--ink); background: linear-gradient(transparent, rgba(0,0,0,.7)); opacity: 0; transition: opacity .3s; }
+  .orbit-card:hover .orbit-cap, .orbit-card:focus-visible .orbit-cap { opacity: 1; }
+
+  /* active = ring (set by script on capable viewports) */
+  .orbit.is-ring { position: absolute; inset: 0; max-width: none; margin: 0; display: block; }
+  .orbit.is-ring .orbit-card { position: absolute; left: 50%; top: 50%; margin: -73px 0 0 -58px; will-change: transform, opacity; }
+</style>
+
+<script>
+  const mqDesktop = matchMedia('(min-width: 720px)');
+  const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const root = document.querySelector('[data-orbit]') as HTMLElement | null;
+  if (root) {
+    const cards = Array.from(root.querySelectorAll('.orbit-card')) as HTMLElement[];
+    const N = cards.length;
+    let theta = 0, hover = -1, raf = 0, active = false;
+
+    cards.forEach((c, i) => {
+      c.addEventListener('mouseenter', () => (hover = i));
+      c.addEventListener('mouseleave', () => (hover = -1));
+      c.addEventListener('focus', () => (hover = i));
+      c.addEventListener('blur', () => (hover = -1));
+    });
+
+    function frame() {
+      const host = root!.parentElement as HTMLElement;
+      const W = host.clientWidth, H = host.clientHeight, R = Math.min(W, H) * 0.56;
+      if (hover < 0) theta += 0.00075 * 0.5; // slow
+      for (let i = 0; i < N; i++) {
+        const a = theta + i * (2 * Math.PI / N);
+        const x = Math.cos(a) * R, y = Math.sin(a) * R * 0.62;
+        const depth = (Math.sin(a) + 1) / 2;
+        const sc = (0.7 + depth * 0.46) * (hover === i ? 1.3 : 1);
+        cards[i].style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+        cards[i].style.zIndex = String(hover === i ? 160 : Math.round(depth * 100));
+        cards[i].style.opacity = String(hover >= 0 && hover !== i ? 0.5 : 0.55 + depth * 0.45);
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    function enable() {
+      if (active) return; active = true; root!.classList.add('is-ring'); frame();
+    }
+    function disable() {
+      if (!active) return; active = false; cancelAnimationFrame(raf);
+      root!.classList.remove('is-ring');
+      cards.forEach((c) => { c.style.transform = ''; c.style.zIndex = ''; c.style.opacity = ''; });
+    }
+    function evaluate() { (mqDesktop.matches && !mqReduce.matches) ? enable() : disable(); }
+
+    evaluate();
+    mqDesktop.addEventListener('change', evaluate);
+    mqReduce.addEventListener('change', evaluate);
+  }
+</script>
