@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+
+const links = [
+  { label: 'Email', value: 'simonkuester@gmail.com', href: 'mailto:simonkuester@gmail.com' },
+  { label: 'GitHub', value: 'github.com/Simoon896', href: 'https://github.com/Simoon896' },
+  { label: 'LinkedIn', value: 'View profile', href: 'https://www.linkedin.com/' },
+];
+---
+<BaseLayout title="Contact" description="Get in touch with Simon Kuester.">
+  <Container>
+    <h1>Contact</h1>
+    <p class="lede">The fastest way to reach me is email. I'm open to roles and
+      interesting security problems.</p>
+    <ul class="contacts">
+      {links.map((l) => (
+        <li><span class="label">{l.label}</span> <a href={l.href}>{l.value}</a></li>
+      ))}
+    </ul>
+  </Container>
+</BaseLayout>
+<style>
+  .lede { color: var(--muted); max-width: 32em; }
+  .contacts { list-style: none; padding: 0; }
+  .contacts li { padding: var(--space-2) 0; border-bottom: 1px solid var(--hairline); }
+  .label { display: inline-block; width: 6rem; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+</style>
