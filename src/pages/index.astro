@@ -34,6 +34,9 @@ const items = (await getCollection('highlights', ({ data }) => !data.draft))
   .hero-nav a { position: relative; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; }
   .hero-nav a::after { content: ""; position: absolute; left: 0; bottom: -4px; height: 1px; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
   .hero-nav a:hover::after, .hero-nav a:focus-visible::after { transform: scaleX(1); }
+  /* center scrim keeps the identity legible over the cards — themed so it never shows a gray blob in light mode */
   .cover::before { content: ""; position: absolute; inset: 0; z-index: 20; pointer-events: none;
     background: radial-gradient(38% 32% at 50% 50%, rgba(15,14,12,.9), rgba(15,14,12,.45) 45%, transparent 72%); }
+  :global([data-theme='light']) .cover::before {
+    background: radial-gradient(38% 32% at 50% 50%, rgba(250,249,247,.94), rgba(250,249,247,.55) 45%, transparent 72%); }
 </style>
