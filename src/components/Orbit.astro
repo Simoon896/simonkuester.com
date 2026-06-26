@@ -53,7 +53,7 @@ const { items } = Astro.props;
         const depth = (Math.sin(a) + 1) / 2;
         const sc = (0.7 + depth * 0.46) * (hover === i ? 1.3 : 1);
         cards[i].style.transform = `translate(${x}px,${y}px) scale(${sc})`;
-        cards[i].style.zIndex = String(hover === i ? 160 : Math.round(depth * 100));
+        cards[i].style.zIndex = String(hover === i ? 12 : Math.round(1 + depth * 11));
         cards[i].style.opacity = String(hover >= 0 && hover !== i ? 0.5 : 0.55 + depth * 0.45);
       }
       raf = requestAnimationFrame(frame);
