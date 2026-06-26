@@ -1,5 +1,5 @@
 ---
 image: /uploads/highlights/friends.jpg
 caption: Friends
-order: 9
+order: 7
 ---

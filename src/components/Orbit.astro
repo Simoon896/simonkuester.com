@@ -13,8 +13,10 @@ const { items } = Astro.props;
 </div>
 
 <style>
-  /* default = calm static gallery (mobile / no-JS / reduced-motion) */
-  .orbit { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); max-width: 760px; margin: var(--space-5) auto 0; }
+  /* Hidden by default. The script only reveals it as a ring on screens wide
+     enough to show the collage properly; on small/narrow screens and mobile
+     there are no photos — just the centered name + nav. */
+  .orbit { display: none; }
   .orbit-card { position: relative; width: 138px; height: 174px; border-radius: 10px; overflow: hidden;
     border: 1px solid rgba(255,255,255,.10); box-shadow: 0 14px 40px rgba(0,0,0,.45); }
   .orbit-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -22,13 +24,13 @@ const { items } = Astro.props;
     color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.72)); opacity: 0; transition: opacity .3s; }
   .orbit-card:hover .orbit-cap, .orbit-card:focus-visible .orbit-cap { opacity: 1; }
 
-  /* active = ring (set by script on capable viewports) */
-  .orbit.is-ring { position: absolute; inset: 0; max-width: none; margin: 0; display: block; }
+  .orbit.is-ring { display: block; position: absolute; inset: 0; }
   .orbit.is-ring .orbit-card { position: absolute; left: 50%; top: 50%; margin: -87px 0 0 -69px; will-change: transform, opacity; }
 </style>
 
 <script>
-  const mqDesktop = matchMedia('(min-width: 720px)');
+  // Show the ring only when there's room for it AND motion is allowed.
+  const mqWide = matchMedia('(min-width: 900px)');
   const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.querySelector('[data-orbit]') as HTMLElement | null;
   if (root) {
@@ -68,10 +70,10 @@ const { items } = Astro.props;
       root!.classList.remove('is-ring');
       cards.forEach((c) => { c.style.transform = ''; c.style.zIndex = ''; c.style.opacity = ''; });
     }
-    function evaluate() { (mqDesktop.matches && !mqReduce.matches) ? enable() : disable(); }
+    function evaluate() { (mqWide.matches && !mqReduce.matches) ? enable() : disable(); }
 
     evaluate();
-    mqDesktop.addEventListener('change', evaluate);
+    mqWide.addEventListener('change', evaluate);
     mqReduce.addEventListener('change', evaluate);
   }
 </script>

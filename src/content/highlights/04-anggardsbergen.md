@@ -1,5 +1,5 @@
 ---
 image: /uploads/highlights/anggardsbergen.jpg
 caption: Gothenburg
-order: 5
+order: 4
 ---
