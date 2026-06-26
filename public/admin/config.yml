@@ -2,7 +2,7 @@ backend:
   name: github
   repo: Simoon896/simonkuester.com
   branch: main
-  base_url: https://REPLACE-WITH-OAUTH-WORKER.workers.dev
+  base_url: https://sveltia-cms-auth.simonkuester.workers.dev
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
