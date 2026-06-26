@@ -1,0 +1,22 @@
+---
+import FormattedDate from './FormattedDate.astro';
+interface Props { href: string; title: string; date: Date; summary: string; }
+const { href, title, date, summary } = Astro.props;
+---
+<article class="card">
+  <a href={href} class="card-link">
+    <h3>{title}</h3>
+    <p class="meta"><FormattedDate date={date} /></p>
+    <p class="summary">{summary}</p>
+    <span class="more">Read →</span>
+  </a>
+</article>
+<style>
+  .card { border-bottom: 1px solid var(--hairline); padding: var(--space-4) 0; }
+  .card h3 { margin: 0 0 var(--space-1); }
+  .card .summary { color: var(--ink); margin: var(--space-2) 0; }
+  .card .more { color: var(--accent); font-size: 0.9rem; }
+  .card-link { color: inherit; display: block; }
+  .card-link:hover { text-decoration: none; }
+  .card-link:hover h3 { color: var(--accent); }
+</style>
