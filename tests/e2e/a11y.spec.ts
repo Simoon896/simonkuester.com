@@ -19,7 +19,7 @@ test('skip-to-content link exists', async ({ page }) => {
   await expect(page.locator('a[href="#main"]')).toHaveCount(1);
 });
 
-test('theme toggle has accessible name', async ({ page }) => {
+test('theme toggle is reachable on home', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('button', { name: /toggle theme/i })).toBeVisible();
 });
