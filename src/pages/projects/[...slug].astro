@@ -1,0 +1,35 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import Tag from '../../components/Tag.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+---
+<BaseLayout title={d.title} description={d.summary} type="article">
+  <Container>
+    <article class="prose">
+      <p class="meta">{d.role} · {d.period}</p>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.summary}</p>
+      <div class="tools">{d.tools.map((t) => <Tag label={t} />)}</div>
+      <Content />
+      {d.links.length > 0 && (
+        <p class="links">{d.links.map((l) => <a href={l.url}>{l.label} →</a>)}</p>
+      )}
+      <p><a href="/projects/">← All projects</a></p>
+    </article>
+  </Container>
+</BaseLayout>
+<style>
+  .lede { font-size: 1.15rem; color: var(--muted); }
+  .tools { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
+  .links { display: flex; gap: var(--space-4); }
+</style>
