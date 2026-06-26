@@ -191,14 +191,12 @@ Before calling v1 done:
 
 ---
 
-## 11. Open Questions / Inputs Needed
+## 11. Implementation Inputs (resolved)
 
-These are needed during implementation, not for this design:
-
-1. **Registrar** — where was `simonkuester.com` purchased (e.g., Namecheap, Google/Squarespace, GoDaddy, Cloudflare)? Determines the exact DNS steps.
-2. **GitHub** — existing account/username, or create one?
-3. **Content** — bio text, experience/roles, résumé PDF, optional headshot, an initial project or two, and a first post (can start with placeholders and replace via `/admin`).
-4. **Contact email** — use `simonkuester@gmail.com`, or a custom/aliased address?
+1. **Registrar:** **Namecheap.** DNS will be pointed at Cloudflare (move nameservers to Cloudflare, or add the records Cloudflare provides at Namecheap). Exact steps in the implementation plan.
+2. **GitHub:** existing account **`Simoon896`**.
+3. **Content strategy:** build with believable **placeholder content** first (realistic for a cybersecurity professional); real bio, experience, résumé PDF, headshot, projects, and posts added afterward via `/admin`. The build must make swapping placeholders for real content trivial.
+4. **Contact email:** **`simonkuester@gmail.com`**.
 
 ---
 
