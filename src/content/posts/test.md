@@ -5,7 +5,7 @@ summary: Test
 tags:
   - Test
 coverImage: ''
-draft: true
+draft: false
 ---
 
 Test!!!!
