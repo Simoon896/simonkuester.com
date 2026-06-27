@@ -1,9 +1,10 @@
 ---
 import Tag from './Tag.astro';
-interface Props { href: string; title: string; summary: string; tools: string[]; }
-const { href, title, summary, tools } = Astro.props;
+interface Props { href: string; title: string; summary: string; tools: string[]; coverImage?: string; }
+const { href, title, summary, tools, coverImage } = Astro.props;
 ---
 <a class="project-card" href={href}>
+  {coverImage && <img class="cover" src={coverImage} alt="" loading="lazy" />}
   <h3>{title}</h3>
   <p class="summary">{summary}</p>
   <div class="tools">{tools.map((t) => <Tag label={t} />)}</div>
@@ -15,6 +16,7 @@ const { href, title, summary, tools } = Astro.props;
     transition: border-color 0.2s ease, transform 0.2s ease;
   }
   .project-card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; }
+  .project-card .cover { display: block; width: 100%; height: auto; border-radius: var(--radius); margin-bottom: var(--space-3); }
   .project-card h3 { margin: 0 0 var(--space-2); }
   .project-card .summary { color: var(--muted); margin: 0 0 var(--space-3); }
   .tools { display: flex; gap: var(--space-2); flex-wrap: wrap; }

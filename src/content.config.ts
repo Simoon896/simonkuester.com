@@ -18,7 +18,6 @@ const projects = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
-    role: z.string(),
     period: z.string(),
     tools: z.array(z.string()).default([]),
     summary: z.string(),

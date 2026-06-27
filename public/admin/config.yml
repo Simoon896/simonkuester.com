@@ -33,7 +33,6 @@ collections:
     format: "frontmatter"
     fields:
       - { name: "title", label: "Title", widget: "string" }
-      - { name: "role", label: "Your role", widget: "string" }
       - { name: "period", label: "Period", widget: "string", hint: "e.g. 2024-2025" }
       - { name: "tools", label: "Tools", widget: "list", default: [] }
       - { name: "summary", label: "Summary", widget: "text", hint: "Lead with problem + outcome" }

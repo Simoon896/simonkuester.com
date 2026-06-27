@@ -1,6 +1,5 @@
 ---
 title: AI-Driven Detection Engineering Platform
-role: Extended the Wazuh MCP server with detection-engineering tooling
 period: '2026'
 tools:
   - Python
@@ -11,7 +10,7 @@ summary: Detection-engineering tools for a Wazuh MCP server that let an AI agent
 links:
   - label: Repo
     url: https://github.com/Simoon896/ai-detection-engineering-platform
-coverImage: /uploads/project#1.png
+coverImage: /uploads/project-1.png
 featured: true
 order: 1
 ---
