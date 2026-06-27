@@ -18,6 +18,10 @@ lighthouse-*.json
 _source-images/
 _imgtmp/
 
+# Résumé working copies dropped in the repo root — these are full-contact source files
+# and must NEVER be committed. The public, redacted copy ships as public/resume.pdf.
+/Simon_Kuester_Resume*.pdf
+
 # Visual companion (brainstorming) — not part of the site
 .superpowers/
 
