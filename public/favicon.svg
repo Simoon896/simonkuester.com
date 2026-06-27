@@ -1,4 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#23406E"/>
-  <text x="16" y="22" font-family="Georgia, serif" font-size="18" fill="#FAF9F7" text-anchor="middle">SK</text>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86b6ff"/><stop offset="1" stop-color="#3f72ff"/></linearGradient>
+    <linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff90c5"/><stop offset="1" stop-color="#ff3d9c"/></linearGradient>
+    <linearGradient id="l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6ff7a"/><stop offset="1" stop-color="#5ee62a"/></linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7.5" fill="#0F0E0C"/>
+  <circle cx="12" cy="12" r="6.6" fill="url(#b)"/>
+  <circle cx="22" cy="14" r="5.4" fill="url(#p)"/>
+  <circle cx="16" cy="22" r="5.8" fill="url(#l)"/>
 </svg>
