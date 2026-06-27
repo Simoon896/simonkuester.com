@@ -1,0 +1,81 @@
+---
+// Decorative paint splotches scattered into the page corners — crisp, flat color
+// (no blur, no gradient), sparse, and non-interactive. They drift + morph very
+// slowly; the global prefers-reduced-motion rule freezes them. Placement is seeded
+// from the page path, so each section gets its own arrangement (stable per build).
+// Used by BaseLayout on every non-cover page; only shown >=1024px so reading stays
+// clean (and they live in the side margins where they won't sit behind text).
+interface Props { seed?: string; }
+const { seed = Astro.url.pathname } = Astro.props;
+
+// deterministic PRNG seeded from the path (FNV-1a hash -> mulberry32)
+let h = 2166136261;
+for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+const rnd = () => {
+  h += 0x6d2b79f5; let t = Math.imul(h ^ (h >>> 15), 1 | h);
+  t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const shuffle = <T,>(a: T[]) => {
+  const r = [...a];
+  for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
+  return r;
+};
+
+const COLORS = ['#3f72ff', '#ff3d9c', '#ff7a30', '#8f47ff', '#15cfe6', '#5ee62a'];
+// Always one top corner, one (diagonally opposite) bottom corner, and one mid-edge
+// accent — so the scatter stays balanced no matter the seed. Each bleeds well
+// off-screen so only a corner of paint shows. Side/colour/size still vary per page.
+const TOP = ['top:-58px;left:-48px', 'top:-52px;right:-44px'];
+const BOTTOM = ['bottom:-62px;left:-46px', 'bottom:-54px;right:-52px'];
+const MID = ['top:38%;left:-84px', 'top:42%;right:-80px'];
+const topLeft = rnd() < 0.5;
+const zones = [
+  topLeft ? TOP[0] : TOP[1],
+  topLeft ? BOTTOM[1] : BOTTOM[0],
+  rnd() < 0.5 ? MID[0] : MID[1],
+];
+
+const colors = shuffle(COLORS);
+const splotches = zones.map((pos, i) => {
+  const size = Math.round(122 + rnd() * 62);
+  return {
+    pos, color: colors[i], size,
+    dur: Math.round(20 + rnd() * 10),
+    morph: Math.round(16 + rnd() * 8),
+    delay: -Math.round(rnd() * 12),
+    fx: (rnd() < 0.5 ? 1 : -1) * Math.round(5 + rnd() * 5),
+    fy: (rnd() < 0.5 ? 1 : -1) * Math.round(5 + rnd() * 5),
+  };
+});
+---
+<div class="splotches" aria-hidden="true">
+  {splotches.map((s) => (
+    <span
+      class="splotch"
+      style={`${s.pos};width:${s.size}px;height:${Math.round(s.size * 0.9)}px;background:${s.color};--d:${s.dur}s;--m:${s.morph}s;--dl:${s.delay}s;--fx:${s.fx}px;--fy:${s.fy}px`}
+    ></span>
+  ))}
+</div>
+
+<style>
+  .splotches { display: none; }
+  @media (min-width: 1024px) {
+    .splotches { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  }
+  .splotch {
+    position: absolute;
+    border-radius: 60% 40% 55% 45% / 52% 46% 54% 48%;
+    will-change: transform, border-radius;
+    animation: sp-float var(--d, 24s) ease-in-out infinite, sp-morph var(--m, 18s) ease-in-out infinite;
+    animation-delay: var(--dl, 0s), var(--dl, 0s);
+  }
+  @keyframes sp-float {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(var(--fx, 7px), var(--fy, -5px)); }
+  }
+  @keyframes sp-morph {
+    0%, 100% { border-radius: 63% 37% 47% 53% / 42% 58% 42% 58%; }
+    50% { border-radius: 46% 54% 58% 42% / 56% 44% 55% 45%; }
+  }
+</style>

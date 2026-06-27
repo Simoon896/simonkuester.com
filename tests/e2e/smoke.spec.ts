@@ -9,5 +9,5 @@ test('home loads with the right title', async ({ page }) => {
 test('home shows the centered identity', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Simon Kuester' })).toBeVisible();
-  await expect(page.getByText(/secure systems/i)).toBeVisible();
+  await expect(page.getByText(/Genix Cyber/i)).toBeVisible();
 });

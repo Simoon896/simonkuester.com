@@ -1,0 +1,79 @@
+---
+// Decorative gradient "blobs" that slowly orbit the identity on the home cover
+// — a pure-CSS replacement for the photo Orbit. No client JS.
+//
+// Buttery by construction: every per-frame animation is a GPU-composited
+// transform (orbit rotation + a gentle non-uniform "breathe"). Shape, color and
+// glow are all static and rasterized once per blob, so nothing repaints while
+// moving. The global prefers-reduced-motion rule in global.css freezes it to a
+// static arrangement; blobs only show >=900px. The photo version lives on in
+// Orbit.astro as a backup.
+interface Blob {
+  a: number;    // angle around the ring (deg)
+  rr: number;   // orbit radius (vmin)
+  ss: number;   // blob size (vmin)
+  g: string;    // bright two-tone gradient
+  glow: string; // soft colored glow
+  br: string;   // fixed asymmetric blob silhouette
+  bd: number;   // breathe duration (s)
+  dl: number;   // negative start offset (s)
+}
+
+const blobs: Blob[] = [
+  { a: 0,   rr: 41, ss: 21, g: 'linear-gradient(135deg,#6fa3ff,#2f5cff)', glow: 'rgba(79,130,255,.45)', br: '64% 36% 48% 52% / 42% 58% 42% 58%', bd: 13, dl: 2 },
+  { a: 60,  rr: 37, ss: 17, g: 'linear-gradient(135deg,#ff7ab8,#ff1f86)', glow: 'rgba(255,45,142,.42)', br: '42% 58% 62% 38% / 56% 40% 60% 44%', bd: 15, dl: 6 },
+  { a: 120, rr: 45, ss: 19, g: 'linear-gradient(135deg,#ffc24d,#ff5a1f)', glow: 'rgba(255,106,31,.42)', br: '58% 42% 38% 62% / 46% 62% 38% 54%', bd: 12, dl: 9 },
+  { a: 180, rr: 39, ss: 23, g: 'linear-gradient(135deg,#bd86ff,#7b2cff)', glow: 'rgba(139,61,255,.45)', br: '36% 64% 56% 44% / 60% 44% 56% 40%', bd: 16, dl: 1 },
+  { a: 240, rr: 44, ss: 16, g: 'linear-gradient(135deg,#5cf2e6,#00c2e0)', glow: 'rgba(0,198,224,.42)',  br: '52% 48% 44% 56% / 38% 56% 44% 62%', bd: 14, dl: 5 },
+  { a: 300, rr: 38, ss: 18, g: 'linear-gradient(135deg,#ccff5c,#4ed01f)', glow: 'rgba(126,211,33,.42)', br: '60% 40% 54% 46% / 50% 42% 58% 50%', bd: 17, dl: 8 },
+];
+---
+<div class="blob-orbit" aria-hidden="true">
+  <div class="bo-ellipse">
+    <div class="bo-ring">
+      {blobs.map((b) => (
+        <div class="bo-slot" style={`--a:${b.a}deg;--r:${b.rr}vmin`}>
+          <div
+            class="bo-shape"
+            style={`--sz:${b.ss}vmin;--g:${b.g};--glow:${b.glow};--br:${b.br};--bd:${b.bd}s;--dl:-${b.dl}s`}
+          ></div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .blob-orbit { display: none; }
+  @media (min-width: 900px) {
+    .blob-orbit { display: block; position: absolute; inset: 0; z-index: 2; overflow: visible; }
+  }
+  .bo-ellipse { position: absolute; inset: 0; transform: scaleY(.82); }
+  .bo-ring {
+    position: absolute; inset: 0; transform-origin: 50% 50%;
+    animation: bo-orbit 85s linear infinite;
+    will-change: transform;
+  }
+  .bo-slot {
+    position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+    transform: rotate(var(--a)) translateX(var(--r));
+  }
+  .bo-shape {
+    position: absolute; left: 0; top: 0; width: var(--sz); height: var(--sz);
+    margin: calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);
+    background: var(--g);
+    border-radius: var(--br);
+    box-shadow: 0 0 calc(var(--sz) * .22) var(--glow);
+    backface-visibility: hidden;
+    will-change: transform;
+    animation: bo-breathe var(--bd) ease-in-out infinite;
+    animation-delay: var(--dl);
+  }
+  @keyframes bo-orbit { to { transform: rotate(360deg); } }
+  /* non-uniform scale + micro-rotation = organic flex, all on the compositor */
+  @keyframes bo-breathe {
+    0%, 100% { transform: scale(1, 1) rotate(0deg); }
+    30%      { transform: scale(1.07, .93) rotate(2.2deg); }
+    60%      { transform: scale(.94, 1.06) rotate(-2.2deg); }
+  }
+</style>

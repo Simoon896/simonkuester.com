@@ -39,6 +39,9 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Keep page content above the decorative paint splotches (fixed at z:0) */
+body > header, body > main, body > footer { position: relative; z-index: 1; }
+
 h1 { font-family: var(--font-display); font-weight: 600; line-height: 1.04; letter-spacing: 0; font-size: clamp(2.4rem, 6vw, 3.6rem); }
 h2, h3, h4 { font-family: var(--font-sans); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
 h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
@@ -68,4 +71,15 @@ img { max-width: 100%; height: auto; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Page transition (Astro View Transitions): a soft, professional cross-fade — the
+   new page fades up while the old fades out. Pure opacity (no transform), so it
+   stays perfectly smooth at any resolution. Reduced-motion gets a clean cut. */
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+::view-transition-old(root) { animation: vt-fade-out 0.26s ease both; }
+::view-transition-new(root) { animation: vt-fade-in 0.42s cubic-bezier(.2, .6, .2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }

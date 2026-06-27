@@ -15,11 +15,5 @@
   :global([data-theme='dark']) .icon-light { display: none; }
   :global([data-theme='dark']) .icon-dark { display: inline; }
 </style>
-<script is:inline>
-  document.getElementById('theme-toggle')?.addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-  });
-</script>
+{/* The toggle click is handled by a delegated listener in BaseLayout so it keeps
+    working across View-Transition navigations. */}

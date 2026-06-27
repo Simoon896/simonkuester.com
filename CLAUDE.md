@@ -6,7 +6,7 @@ Project context for Claude Code sessions. Read this first.
 Personal professional website for **Simon Kuester**, a cybersecurity professional — a recruiter-facing portfolio + blog. **Live at https://simonkuester.com.**
 
 ## Stack
-- **Astro 7** (static output, TypeScript strict). Zero client JS except a tiny home-page orbit script + the theme toggle.
+- **Astro 7** (static output, TypeScript strict). Client JS is minimal: the home-page blob-field physics (`BlobField.astro`) + the theme toggle. **Page transitions** use Astro View Transitions (`ClientRouter` in `BaseLayout`) — a soft cross-fade defined in `global.css`.
 - **Type:** Cormorant Garamond (display / `h1`) + Inter (everything else). Tokens in `src/styles/global.css`.
 - **Theme:** **dark by default**, light available via the header toggle (persisted in `localStorage`, key `theme`).
 - **CMS:** Sveltia CMS at `/admin` (config `public/admin/config.yml`), commits Markdown to this repo. Auth via a separate Cloudflare Worker `sveltia-cms-auth` (https://sveltia-cms-auth.simonkuester.workers.dev) + a GitHub OAuth App.
@@ -24,19 +24,20 @@ npm run test:e2e   # Playwright (tests/e2e/*.spec.ts) — builds+previews itself
 **Windows / automation notes:** never run `npm run dev`/`astro preview` in the foreground from automation (they block) — use `build`/`test:e2e`. Playwright's webServer reuses an existing server on :4321, so kill stray dev servers before screenshotting or you'll capture stale content.
 
 ## Layout of the code
-- `src/pages/index.astro` — the **home "Orbit" cover** (see below). Uses `<BaseLayout cover>`.
+- `src/pages/index.astro` — the **home blob-field cover** (see below). Uses `<BaseLayout cover>`.
 - `src/pages/{about,contact,404}.astro`, `src/pages/projects/`, `src/pages/writing/` — inner pages.
-- `src/layouts/BaseLayout.astro` — `<head>`/SEO/OG, theme bootstrap, header/footer. Prop `cover` hides the header + footer and shows a corner theme toggle (used only by the home page).
-- `src/components/` — `Header`, `Footer`, `ThemeToggle`, `Container`, `Orbit`, `PostCard`, `ProjectCard`, `Tag`, `FormattedDate`.
-- `src/content/{posts,projects,highlights}/*.md` — content.
-- `public/admin/` — Sveltia CMS. `public/uploads/highlights/` — orbit photos.
+- `src/layouts/BaseLayout.astro` — `<head>`/SEO/OG, theme bootstrap (+ delegated theme-toggle handler that survives transitions), `ClientRouter`, header/footer, and `PaintSplotches` on non-cover pages. Prop `cover` hides the header + footer and shows a corner theme toggle (home only).
+- `src/components/` — `Header`, `Footer`, `ThemeToggle`, `Container`, `BlobField` (home cover), `PaintSplotches` (inner-page corner decor), `PostCard`, `ProjectCard`, `Tag`, `FormattedDate`. `Orbit` (original photo orbit) + `BlobOrbit` (a CSS-orbit iteration) are **unused backups** of earlier home treatments — not imported, kept for reference.
+- `src/content/{posts,projects,highlights}/*.md` — content. (`highlights` now feeds only the backup photo `Orbit`; the live home is abstract.)
+- `public/admin/` — Sveltia CMS. `public/uploads/highlights/` — photos for the backup orbit.
 
-## The home page (Orbit cover)
-A dark, full-screen cover: centered **name + one-line blurb + nav only**, wrapped by a slowly **rotating ring of "Highlights" photo cards** (`src/components/Orbit.astro`, fed by the `highlights` collection). Behavior:
-- The ring shows **only on screens ≥ 900px wide AND when motion is allowed**. Below that (narrow windows / mobile / `prefers-reduced-motion` / no-JS) the orbit is **hidden entirely** — just the name + nav.
-- Hover/focus a card → pauses the ring + enlarges that card + shows its caption. Cards with a `link` navigate; others are inert.
-- Identity always renders above the cards (z-index) with a theme-aware center scrim, so it stays legible in both themes.
-- Progressive enhancement: cards are real `<a><img alt></a>` links in the HTML (SEO/a11y); the script only adds the ring.
+## The home page (blob-field cover)
+A dark, full-screen cover: centered **name + role + nav + a "drag and release the balls :)" hint**, over a field of **bright, draggable, physics-driven blobs** (`src/components/BlobField.astro` — CSS-styled gradient blobs + a small `requestAnimationFrame` loop). Behavior:
+- 6 gradient blobs drift DVD-style, **collide** with each other and the walls (elastic, with an eased "slimy" squash), and can be **grabbed and flung** with the mouse (a goo-filter slime stretch while dragging; off-drag the tail is glued so a fast blob stays one clean circle).
+- Shows **only ≥ 900px wide**; below that (mobile/narrow) the home is text-only. `prefers-reduced-motion` freezes it to a static spread. The field is decorative (`aria-hidden`); identity sits above it (z-index) with a theme-aware center scrim. The hint shows only ≥900px + motion-allowed (where the balls are actually draggable).
+- The blob field re-initialises on each View-Transition navigation (`astro:page-load`) and cleans up on `astro:before-swap`.
+
+**Inner pages** get sparse, flat, **crisp paint splotches** in the corners (`src/components/PaintSplotches.astro`, added by `BaseLayout` on non-cover pages): 3 per page, **seeded from the path** (each section differs — one top corner, one diagonal bottom corner, one mid-edge), slowly drifting/morphing, **behind** the content in the margins, **≥1024px only**, frozen under reduced-motion.
 
 ## Design preferences (important — the owner is particular)
 - **Minimal / editorial, quiet, dark.** Avoid: "AI gradient" looks, corny cybersecurity clichés (matrix green, terminal gimmicks), loud effects.
@@ -48,17 +49,17 @@ A dark, full-screen cover: centered **name + one-line blurb + nav only**, wrappe
 - `_source-images/` (photo originals/zips) is gitignored — only the optimized copies in `public/uploads/` ship.
 
 ## Current state & next steps
-Built and **deployed live**. Quality bar held: Lighthouse ~99/100/100/100, WCAG AA, e2e 32 + unit 2 passing.
+Built and **deployed live**, including the **June 2026 redesign**: the interactive blob-field home cover, inner-page paint splotches, and the cross-fade page transition. Tests green: **e2e 34 + unit 2**.
 
-**Still placeholders to replace (low effort):**
-- `public/resume.pdf` — currently a stub; drop in the real résumé.
-- About-page **bio + experience** (`src/pages/about.astro`) and the **LinkedIn URL** (in `Header`/`Footer`/`contact.astro`) — hardcoded placeholders.
-- Orbit **photo captions** ("The Alamo", "Gothenburg"…) are placeholders — edit in `/admin` → Highlights, or in `src/content/highlights/`.
-- The 2 sample **projects** and 2 sample **posts** — replace via `/admin`.
+**NEXT UP — content (the current focus for this/next session):**
+- **About page** (`src/pages/about.astro`) — write the real bio + experience. Simon is now a **Cybersecurity Engineering Associate @ Genix Cyber** (reflected in the home role line); the About copy is still placeholder.
+- **Write-ups / blog posts** — replace the 2 sample posts in `src/content/posts/` with real writing, and add new ones. (Editable via `/admin` or by adding Markdown.)
+- **Projects** — replace the 2 sample projects in `src/content/projects/` with real work.
+- **LinkedIn URL** (hardcoded placeholder in `Header`/`Footer`/`contact.astro`) and `public/resume.pdf` (stub) — drop in the real ones.
 
 **Recommended follow-ups:**
-- A **1200×630 raster OG image** (social link previews currently fall back to the favicon SVG, which most platforms won't render).
-- Optionally make linkless orbit cards open a lightbox; optionally make About/Home copy CMS-editable.
+- A **1200×630 raster OG image** (social previews currently fall back to the favicon SVG, which most platforms won't render).
+- Optional polish: tune the blob/splotch look (saturation, count, breakpoints) if desired.
 
 ## Specs & plans
 - Original build: `docs/superpowers/specs/2026-06-26-personal-website-design.md`, `docs/superpowers/plans/2026-06-26-simonkuester-website.md`.

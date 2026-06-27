@@ -1,0 +1,256 @@
+---
+// Interactive "blob field" for the home cover: bright gradient blobs that drift
+// DVD-style, collide with each other and the walls (elastic, with a slimy squash
+// that eases in), and can be grabbed and pulled with a clamped elastic tail.
+// Physics run in a small rAF loop (the one place on the site with real client JS),
+// re-initialised on each View-Transition navigation. Motion is transform-only
+// (composited/buttery); the gooey SVG filter attaches to a blob only while it's
+// dragging. Shows >=900px; prefers-reduced-motion freezes it to a static spread.
+// The page-slide transition itself is handled natively by ClientRouter + the
+// view-transition CSS in global.css. BlobOrbit + Orbit remain as backups.
+interface BlobCfg { g: string; sf: number; }
+
+const blobs: BlobCfg[] = [
+  { g: 'linear-gradient(135deg,#86b6ff,#3f72ff)', sf: 0.17 },
+  { g: 'linear-gradient(135deg,#ff90c5,#ff3d9c)', sf: 0.13 },
+  { g: 'linear-gradient(135deg,#ffce6a,#ff7a30)', sf: 0.15 },
+  { g: 'linear-gradient(135deg,#caa0ff,#8f47ff)', sf: 0.19 },
+  { g: 'linear-gradient(135deg,#74f6ec,#15cfe6)', sf: 0.12 },
+  { g: 'linear-gradient(135deg,#d6ff7a,#5ee62a)', sf: 0.14 },
+];
+---
+<div class="blob-field" aria-hidden="true" data-blob-field>
+  <svg class="bf-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="bf-goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b" />
+        <feColorMatrix in="b" type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" />
+      </filter>
+    </defs>
+  </svg>
+  {blobs.map((b) => (
+    <div class="bf-blob" data-sf={b.sf} style={`--g:${b.g}`}>
+      <div class="bf-tail"></div>
+      <div class="bf-head"></div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .blob-field { display: none; }
+  @media (min-width: 900px) {
+    .blob-field { display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  }
+  .bf-defs { position: absolute; width: 0; height: 0; }
+  .bf-blob {
+    position: absolute; left: 0; top: 0; width: var(--sz, 140px); height: var(--sz, 140px);
+    margin: calc(var(--sz, 140px) / -2) 0 0 calc(var(--sz, 140px) / -2);
+    pointer-events: none; will-change: transform;
+  }
+  .bf-blob.is-slime { filter: url(#bf-goo); }
+  .bf-head, .bf-tail {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    background: var(--g);
+    border-radius: 48% 52% 54% 46% / 52% 46% 54% 48%;
+  }
+  .bf-head { pointer-events: auto; touch-action: none; cursor: grab; }
+  .bf-blob.is-drag .bf-head { cursor: grabbing; }
+</style>
+
+<script>
+  const mqWide = matchMedia('(min-width: 900px)');
+  const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
+  let cleanup: (() => void) | null = null;
+
+  function initBlobField() {
+    const root = document.querySelector('[data-blob-field]') as HTMLElement | null;
+    if (!root || cleanup) return; // not the home page, or already running
+
+    const els = Array.from(root.querySelectorAll('.bf-blob')) as HTMLElement[];
+
+    type B = {
+      el: HTMLElement; head: HTMLElement; tail: HTMLElement; sf: number; size: number;
+      x: number; y: number; vx: number; vy: number; tx: number; ty: number;
+      dx: number; dy: number; dvx: number; dvy: number;
+      dragging: boolean; slime: boolean; gx: number; gy: number; targetX: number; targetY: number;
+    };
+
+    const SPEED = 78;        // px/s cruise
+    const TAIL_MAX = 24;     // px — keep the drag tail within the goo's bridge
+    const REST = 0.9;        // collision restitution
+    let W = 0, H = 0, raf = 0, running = false, last = 0;
+    let activeBlob: B | null = null, activeId = -1;
+
+    const blobs: B[] = els.map((el) => ({
+      el, head: el.querySelector('.bf-head') as HTMLElement, tail: el.querySelector('.bf-tail') as HTMLElement,
+      sf: parseFloat(el.dataset.sf || '0.15'), size: 0,
+      x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, dx: 0, dy: 0, dvx: 0, dvy: 0,
+      dragging: false, slime: false, gx: 0, gy: 0, targetX: 0, targetY: 0,
+    }));
+
+    function measure() {
+      W = root!.clientWidth; H = root!.clientHeight;
+      const base = Math.min(W, H);
+      for (const b of blobs) { b.size = Math.round(base * b.sf); b.el.style.setProperty('--sz', b.size + 'px'); }
+    }
+    function render(b: B) {
+      const sx = 1 + b.dx, sy = 1 + b.dy;
+      b.el.style.transform = `translate(${b.x.toFixed(2)}px,${b.y.toFixed(2)}px) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+      b.tail.style.transform = `translate(${(b.tx - b.x).toFixed(2)}px,${(b.ty - b.y).toFixed(2)}px)`;
+    }
+    function place() {
+      measure();
+      for (const b of blobs) {
+        const m = b.size / 2 + 8;
+        b.x = m + Math.random() * (W - 2 * m); b.y = m + Math.random() * (H - 2 * m);
+        const a = Math.random() * Math.PI * 2; b.vx = Math.cos(a) * SPEED; b.vy = Math.sin(a) * SPEED;
+        b.tx = b.x; b.ty = b.y; b.dx = b.dy = b.dvx = b.dvy = 0; render(b);
+      }
+    }
+    function staticPlace() {
+      measure();
+      const pts = [[.5, .17], [.83, .33], [.75, .73], [.5, .85], [.18, .7], [.16, .31]];
+      blobs.forEach((b, i) => { const p = pts[i % pts.length]; b.x = p[0] * W; b.y = p[1] * H; b.tx = b.x; b.ty = b.y; render(b); });
+    }
+    function decay(b: B, dt: number) {
+      b.dvx += (-95 * b.dx - 6 * b.dvx) * dt; b.dx += b.dvx * dt;
+      b.dvy += (-95 * b.dy - 6 * b.dvy) * dt; b.dy += b.dvy * dt;
+      if (b.dx > .42) { b.dx = .42; if (b.dvx > 0) b.dvx = 0; } else if (b.dx < -.42) { b.dx = -.42; if (b.dvx < 0) b.dvx = 0; }
+      if (b.dy > .42) { b.dy = .42; if (b.dvy > 0) b.dvy = 0; } else if (b.dy < -.42) { b.dy = -.42; if (b.dvy < 0) b.dvy = 0; }
+    }
+    function squash(b: B, nx: number, ny: number, sp: number) {
+      const imp = Math.min(3, 0.8 + sp * 0.012);
+      b.dvx += imp * (ny * ny - nx * nx);
+      b.dvy += imp * (nx * nx - ny * ny);
+    }
+    function wall(b: B, axis: number) {
+      const sp = Math.hypot(b.vx, b.vy);
+      squash(b, axis === 0 ? 1 : 0, axis === 0 ? 0 : 1, sp);
+    }
+    function collide() {
+      for (let i = 0; i < blobs.length; i++) {
+        for (let j = i + 1; j < blobs.length; j++) {
+          const a = blobs[i], b = blobs[j];
+          const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy), minD = a.size / 2 + b.size / 2;
+          if (dist <= 0 || dist >= minD) continue;
+          const nx = dx / dist, ny = dy / dist, overlap = minD - dist;
+          const ima = a.dragging ? 0 : 1 / (a.size * a.size), imb = b.dragging ? 0 : 1 / (b.size * b.size), s = ima + imb;
+          if (s <= 0) continue;
+          a.x -= nx * overlap * (ima / s); a.y -= ny * overlap * (ima / s);
+          b.x += nx * overlap * (imb / s); b.y += ny * overlap * (imb / s);
+          const rvn = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+          if (rvn < 0) {
+            const jimp = -(1 + REST) * rvn / s;
+            a.vx -= jimp * ima * nx; a.vy -= jimp * ima * ny;
+            b.vx += jimp * imb * nx; b.vy += jimp * imb * ny;
+            squash(a, nx, ny, -rvn); squash(b, nx, ny, -rvn);
+          }
+        }
+      }
+    }
+    function step(t: number) {
+      if (!running) return;
+      const dt = Math.min(0.04, (t - last) / 1000 || 0.016); last = t;
+      for (const b of blobs) {
+        if (b.dragging) {
+          const k = Math.min(1, dt * 16);
+          const nx = b.x + (b.targetX - b.x) * k, ny = b.y + (b.targetY - b.y) * k;
+          b.vx = (nx - b.x) / dt; b.vy = (ny - b.y) / dt;
+          b.x = Math.max(b.size / 2, Math.min(W - b.size / 2, nx));
+          b.y = Math.max(b.size / 2, Math.min(H - b.size / 2, ny));
+        } else {
+          b.x += b.vx * dt; b.y += b.vy * dt;
+          const m = b.size / 2;
+          if (b.x < m) { b.x = 2 * m - b.x; b.vx = Math.abs(b.vx); wall(b, 0); }
+          else if (b.x > W - m) { b.x = 2 * (W - m) - b.x; b.vx = -Math.abs(b.vx); wall(b, 0); }
+          if (b.y < m) { b.y = 2 * m - b.y; b.vy = Math.abs(b.vy); wall(b, 1); }
+          else if (b.y > H - m) { b.y = 2 * (H - m) - b.y; b.vy = -Math.abs(b.vy); wall(b, 1); }
+          const sp = Math.hypot(b.vx, b.vy);
+          if (sp > 0.001) { const ns = sp + (SPEED - sp) * Math.min(1, dt * 0.8); b.vx *= ns / sp; b.vy *= ns / sp; }
+        }
+      }
+      collide();
+      for (const b of blobs) {
+        if (!b.dragging) { const m = b.size / 2; b.x = Math.max(m, Math.min(W - m, b.x)); b.y = Math.max(m, Math.min(H - m, b.y)); }
+        if (b.slime) {
+          // tail trails only while the goo filter is fusing it (drag + settle)
+          const lag = Math.min(1, dt * (b.dragging ? 14 : 26));
+          b.tx += (b.x - b.tx) * lag; b.ty += (b.y - b.ty) * lag;
+          const ox = b.x - b.tx, oy = b.y - b.ty, od = Math.hypot(ox, oy), maxd = Math.min(b.size * 0.32, TAIL_MAX);
+          if (od > maxd) { b.tx = b.x - ox / od * maxd; b.ty = b.y - oy / od * maxd; }
+          if (!b.dragging && od < 1.5 && Math.abs(b.dx) < 0.008 && Math.abs(b.dy) < 0.008) {
+            b.slime = false; b.el.classList.remove('is-slime');
+          }
+        } else {
+          b.tx = b.x; b.ty = b.y; // glued to the head — one clean circle at any speed
+        }
+        decay(b, dt); render(b);
+      }
+      raf = requestAnimationFrame(step);
+    }
+
+    function down(b: B, e: PointerEvent) {
+      if (!running) return;
+      b.dragging = true; b.slime = true; b.el.classList.add('is-slime', 'is-drag');
+      const r = root!.getBoundingClientRect();
+      b.gx = (e.clientX - r.left) - b.x; b.gy = (e.clientY - r.top) - b.y;
+      b.targetX = b.x; b.targetY = b.y;
+      activeBlob = b; activeId = e.pointerId;
+      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    }
+    function move(e: PointerEvent) {
+      if (!activeBlob || e.pointerId !== activeId) return;
+      const r = root!.getBoundingClientRect();
+      activeBlob.targetX = (e.clientX - r.left) - activeBlob.gx;
+      activeBlob.targetY = (e.clientY - r.top) - activeBlob.gy;
+    }
+    function up(e: PointerEvent) {
+      if (!activeBlob || e.pointerId !== activeId) return;
+      activeBlob.dragging = false; activeBlob.el.classList.remove('is-drag');
+      activeBlob = null; activeId = -1;
+    }
+
+    function enable() {
+      if (running) return;
+      if (mqReduce.matches) { staticPlace(); return; }
+      running = true; place(); last = performance.now(); raf = requestAnimationFrame(step);
+    }
+    function disable() { running = false; cancelAnimationFrame(raf); }
+    function evaluate() { mqWide.matches ? enable() : disable(); }
+
+    let rz = 0;
+    const onResize = () => {
+      clearTimeout(rz);
+      rz = window.setTimeout(() => {
+        if (!mqWide.matches) return;
+        measure();
+        for (const b of blobs) { b.x = Math.max(b.size / 2, Math.min(W - b.size / 2, b.x)); b.y = Math.max(b.size / 2, Math.min(H - b.size / 2, b.y)); }
+      }, 150);
+    };
+    const onReduce = () => { disable(); evaluate(); };
+
+    els.forEach((el, i) => el.addEventListener('pointerdown', (e) => down(blobs[i], e as PointerEvent)));
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    window.addEventListener('resize', onResize);
+    mqWide.addEventListener('change', evaluate);
+    mqReduce.addEventListener('change', onReduce);
+    evaluate();
+
+    cleanup = () => {
+      disable();
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      window.removeEventListener('resize', onResize);
+      mqWide.removeEventListener('change', evaluate);
+      mqReduce.removeEventListener('change', onReduce);
+    };
+  }
+
+  document.addEventListener('astro:page-load', initBlobField);
+  document.addEventListener('astro:before-swap', () => { if (cleanup) { cleanup(); cleanup = null; } });
+</script>

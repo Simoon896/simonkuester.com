@@ -1,24 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Orbit from '../components/Orbit.astro';
-
-const items = (await getCollection('highlights', ({ data }) => !data.draft))
-  .sort((a, b) => a.data.order - b.data.order)
-  .map((h) => ({ image: h.data.image, caption: h.data.caption, link: h.data.link }));
+import BlobField from '../components/BlobField.astro';
 ---
 <BaseLayout title="Simon Kuester" cover>
   <section class="cover">
-    <Orbit items={items} />
+    <BlobField />
     <div class="hero">
       <h1>Simon Kuester</h1>
-      <p class="blurb">I secure systems, break them on purpose, and write about what I learn.</p>
+      <p class="blurb">Cybersecurity Engineering Associate @ Genix Cyber</p>
       <nav class="hero-nav" aria-label="Primary">
         <a href="/about/">About</a>
         <a href="/projects/">Projects</a>
         <a href="/writing/">Writing</a>
         <a href="/contact/">Contact</a>
       </nav>
+      <p class="hint" aria-hidden="true">drag and release the balls :)</p>
     </div>
   </section>
 </BaseLayout>
@@ -29,8 +25,11 @@ const items = (await getCollection('highlights', ({ data }) => !data.draft))
   /* hero (z:30) always sits above the scrim (z:20) and all orbit cards (z<=12) so the identity stays legible */
   .hero { position: relative; z-index: 30; text-align: center; pointer-events: none; }
   .hero h1 { font-size: clamp(58px, 8.4vw, 112px); margin: 0; }
-  .blurb { margin: 18px auto 0; max-width: 32ch; color: var(--ink); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.7; }
-  .hero-nav { display: flex; gap: 30px; justify-content: center; margin-top: 30px; pointer-events: auto; flex-wrap: wrap; }
+  .blurb { margin: 18px auto 0; max-width: 50ch; color: var(--ink); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.6; }
+  .hint { margin: 22px auto 0; color: var(--muted); font-size: 13px; letter-spacing: .01em; display: none; }
+  @media (min-width: 900px) { .hint { display: block; } }
+  @media (prefers-reduced-motion: reduce) { .hint { display: none; } }
+  .hero-nav { display: flex; gap: 30px; justify-content: center; margin-top: 28px; pointer-events: auto; flex-wrap: wrap; }
   .hero-nav a { position: relative; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; }
   .hero-nav a::after { content: ""; position: absolute; left: 0; bottom: -4px; height: 1px; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
   .hero-nav a:hover::after, .hero-nav a:focus-visible::after { transform: scaleX(1); }

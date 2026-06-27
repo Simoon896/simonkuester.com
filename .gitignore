@@ -32,3 +32,6 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# Local Claude Code tooling (preview launch config, etc.) — environment-specific
+.claude/
