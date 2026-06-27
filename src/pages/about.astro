@@ -2,17 +2,47 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Container from '../components/Container.astro';
 
-const focus = ['Application security', 'Detection engineering', 'Cloud security', 'Security tooling'];
+const focus = [
+  'Detection engineering',
+  'Security automation',
+  'SIEM / XDR',
+  'NIST & CMMC compliance',
+  'IAM / PAM',
+];
+
 const experience = [
-  { period: '2024–present', role: 'Security Engineer', org: 'Placeholder Co.', note: 'Application & cloud security; built internal tooling.' },
-  { period: '2021–2024', role: 'Security Analyst', org: 'Placeholder Inc.', note: 'Detection engineering and incident response.' },
+  {
+    period: 'Mar 2026 – present',
+    role: 'Cybersecurity Associate',
+    org: 'Genix Cyber',
+    note: "I work on detection content and active-response automation for our Wazuh-based XDR, and I manage the technical side of our StrongDM partnership. The thing I'm most proud of there: I built the integration that pulls StrongDM session logs into our XDR, so privileged actions on shared accounts trace back to the actual person who took them. I've also written 75+ detection rules mapped to MITRE ATT&CK and tied a lot of that work to NIST and CMMC controls.",
+  },
+  {
+    period: 'Jan 2026 – Mar 2026',
+    role: 'Cybersecurity Engineering Intern',
+    org: 'Genix Cyber',
+    note: "I built and tested detection use cases across a bunch of MITRE ATT&CK techniques, and put together an automated malware-response workflow (file-integrity monitoring, VirusTotal, and custom YARA rules) that deletes a malicious file within seconds of catching it, no analyst needed.",
+  },
 ];
 ---
-<BaseLayout title="About" description="About Simon Kuester — background, focus areas, and experience.">
+<BaseLayout title="About" description="About Simon Kuester, a cybersecurity associate at Genix Cyber working on detection, automation, and privileged access.">
   <Container>
     <h1>About</h1>
-    <p class="lede">I'm a cybersecurity professional focused on making complex risk
-      understandable and building tools that make secure the default.</p>
+
+    <p class="lede">I first got into security after someone phished my Minecraft
+      account when I was a kid. I was annoyed, then I got curious about how they
+      pulled it off and how I could've stopped them. That curiosity stuck.</p>
+
+    <p>Now I do it for a living. I'm a cybersecurity associate at Genix Cyber, where
+      I work on threat detection and automated response. What I like about the job is
+      the visibility: making sense of what's happening across a lot of different
+      tools, then building flows that catch a threat and deal with it on their own,
+      without waiting on a person. Getting those systems tuned until they run clean
+      and quiet is the part I find most satisfying.</p>
+
+    <p>Lately I keep getting pulled toward identity and access. After some hands-on
+      work with StrongDM, our privileged-access partner, I got into IAM and PAM, and
+      that's the direction I want to take my career.</p>
 
     <h2>Focus areas</h2>
     <ul class="focus">{focus.map((f) => <li>{f}</li>)}</ul>
@@ -27,18 +57,27 @@ const experience = [
         </li>
       ))}
     </ul>
+    <p class="note">Before Genix, I finished my B.S. in Cybersecurity at the
+      University of North Georgia (2025, 3.84 GPA), and I've got my CompTIA Security+.</p>
 
-    <p><a class="btn" href="/resume.pdf">Download résumé (PDF)</a></p>
+    <h2>Outside work</h2>
+    <p>Outside of work I'm pretty competitive about games. I'm a Top 100 tank player
+      in North America in Overwatch, and I've played national collegiate Marvel
+      Rivals, taking 1st in the PBC and 2nd in the country in the NECC. When I'm not
+      gaming, I'm usually out on a hike.</p>
+
+    <p><a class="btn" href="/resume.pdf">Download resume (PDF)</a></p>
   </Container>
 </BaseLayout>
 
 <style>
   .lede { font-size: 1.2rem; color: var(--muted); }
-  .focus { display: flex; gap: var(--space-2); flex-wrap: wrap; list-style: none; padding: 0; }
+  .focus { display: flex; gap: var(--space-2); flex-wrap: wrap; list-style: none; padding: 0; margin-top: var(--space-3); }
   .focus li { border: 1px solid var(--hairline); border-radius: 999px; padding: 0.2rem 0.7rem; font-size: 0.85rem; }
   .timeline { list-style: none; padding: 0; }
   .timeline li { border-left: 2px solid var(--hairline); padding: 0 0 var(--space-4) var(--space-3); }
   .timeline .role { margin: 0.1rem 0; }
+  .note { color: var(--muted); font-size: 0.95rem; }
   .btn { display: inline-block; background: var(--accent); color: var(--accent-contrast); padding: 0.6rem 1.2rem; border-radius: 8px; }
   .btn:hover { text-decoration: none; opacity: 0.92; }
 </style>
