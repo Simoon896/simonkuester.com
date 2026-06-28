@@ -2,10 +2,11 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource/cormorant-garamond/500.css';
 @import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/700.css';
 
 :root {
   --paper: #FAF9F7; --ink: #1A1A1A; --muted: #6F6A63; --hairline: #E6E2DC;
-  --accent: #23406E; --accent-contrast: #FFFFFF; --code-bg: #F4F2EE;
+  --accent: #A0522D; --accent-contrast: #FFFFFF; --code-bg: #F4F2EE;
 
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
@@ -17,7 +18,7 @@
 
 [data-theme='dark'] {
   --paper: #0F0E0C; --ink: #EFEBE3; --muted: #8C867B; --hairline: #2A2620;
-  --accent: #8FB0E0; --accent-contrast: #0F0E0C; --code-bg: #1B1813;
+  --accent: #DDA07C; --accent-contrast: #0F0E0C; --code-bg: #1B1813;
 }
 
 * { box-sizing: border-box; }

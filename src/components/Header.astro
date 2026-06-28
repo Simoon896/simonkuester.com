@@ -2,7 +2,6 @@
 import ThemeToggle from './ThemeToggle.astro';
 const path = Astro.url.pathname;
 const items = [
-  { href: '/', label: 'Home' },
   { href: '/about/', label: 'About' },
   { href: '/projects/', label: 'Projects' },
   { href: '/writing/', label: 'Writing' },
@@ -28,7 +27,10 @@ const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith
     padding: var(--space-3); border-bottom: 1px solid var(--hairline);
     flex-wrap: wrap;
   }
-  .wordmark { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
+  .wordmark {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 1.25rem; color: var(--ink);
+  }
   nav { margin-inline-start: auto; }
   nav ul { display: flex; gap: var(--space-3); list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
   nav a { color: var(--muted); font-size: 0.95rem; }
