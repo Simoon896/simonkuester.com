@@ -1,16 +1,16 @@
 ---
-title: "Building this site, and checking my own work"
+title: "First post! The process of building my website"
 date: 2026-06-27
 summary: "How I built and deployed this site, the deploy steps that tripped me up, and the security findings I caught when I scanned my own work."
 tags: ["cloudflare", "deployment", "security", "astro"]
 draft: false
 ---
 
-I do detection and response at work, so putting up my own site felt like a good excuse to deploy something properly and then check my own work the way I would anyone else's. Here's how the build went, the parts of deploying that tripped me up, and what I found when I scanned it.
+Something I wanted to do recently is create a good looking personal website, so here it is! Here's how the build went, the parts of deploying that tripped me up, and what I found when I scanned performed a security scan.
 
 ## The build
 
-The site is static. It's built with Astro and output to plain HTML, with barely any JavaScript reaching the browser. For a portfolio that's the right call. There's nothing running at runtime for someone to exploit, and nothing to patch later. It loads fast, too. The less code that runs on a visitor's machine, the less there is to go wrong.
+The site is static. It's built with Astro and output to plain HTML, with barely any JavaScript reaching the browser. There's nothing running at runtime for someone to exploit, and nothing to patch later. It loads fast, too. The less code that runs on a visitor's machine, the less there is to go wrong.
 
 ## Deploying it, where it got annoying
 
@@ -24,11 +24,11 @@ The second was DNS. I moved the domain over to Cloudflare, and the old parking r
 
 ## Checking my own work
 
-Once it was live, I ran a security scan against it, the same way I would against anything else. It came back with nine findings, and a couple were genuinely embarrassing for someone who does this for a living.
+Once it was live, I ran a security scan against it, the same way I would against anything else. Here were the results that I got. 
 
 The big one: my site was being served over plain HTTP. If you typed `http://` instead of `https://`, you got the site back over an unencrypted connection with no redirect. The certificate was there and HTTPS worked fine, but nothing forced you onto it. That's exactly the kind of thing I'd flag in a client's environment, and it was sitting on my own.
 
-The fix was one setting to push every request onto HTTPS, plus HSTS, which tells browsers to refuse plain HTTP for the domain from then on. HSTS is worth handling carefully. It has a "preload" option that bakes your domain into browsers and is genuinely hard to undo, so I left that off until I'm sure and started with a shorter lifetime. I also added a `security.txt` file, a small standard file that tells a researcher how to reach me if they find a problem.
+The fix was one setting to push every request onto HTTPS, plus HSTS, which tells browsers to refuse plain HTTP for the domain from then on. HSTS is worth handling carefully. I also added a `security.txt` file, a small standard file that tells a researcher how to reach me if they find a problem (let me know if you find anything!).
 
 > The page itself is a small target. The account behind it is the real one.
 

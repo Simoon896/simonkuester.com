@@ -10,7 +10,7 @@ const posts = (await getCollection('posts', ({ data }) => !data.draft))
 <BaseLayout title="Writing" description="Writing on cybersecurity by Simon Kuester.">
   <Container>
     <h1>Writing</h1>
-    <p class="lede">Notes on security, detection, and building safer systems.</p>
+    <p class="lede">Creating weekly posts about cybersecurity, new projects, and whatever else that comes to mind</p>
     {posts.map((p) => (
       <PostCard href={`/writing/${p.id}/`} title={p.data.title} date={p.data.date} summary={p.data.summary} />
     ))}

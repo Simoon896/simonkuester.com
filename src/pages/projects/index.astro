@@ -9,7 +9,7 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 <BaseLayout title="Projects" description="Selected security projects and case studies by Simon Kuester.">
   <Container wide>
     <h1>Projects</h1>
-    <p class="lede">Selected work, written up as short case studies.</p>
+    <p class="lede">Selected work that I'm most proud of. Continuously updating this page as I work on new projects! </p>
     <div class="grid">
       {projects.map((p) => (
         <ProjectCard href={`/projects/${p.id}/`} title={p.data.title} summary={p.data.summary} tools={p.data.tools} coverImage={p.data.coverImage} />
