@@ -1,0 +1,6 @@
+# Security contact for simonkuester.com
+# Format: https://securitytxt.org (RFC 9116)
+Contact: mailto:simonkuester@gmail.com
+Expires: 2027-06-27T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://simonkuester.com/.well-known/security.txt

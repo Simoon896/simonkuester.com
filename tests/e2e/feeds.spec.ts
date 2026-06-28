@@ -5,7 +5,8 @@ test('rss feed builds and lists posts', async ({ request }) => {
   expect(res.status()).toBe(200);
   const body = await res.text();
   expect(body).toContain('<rss');
-  expect(body).toContain('Threat modeling for small teams');
+  // At least one post is listed (avoids hardcoding a title that may change).
+  expect(body).toContain('<item>');
 });
 
 test('sitemap index is generated', async ({ request }) => {
