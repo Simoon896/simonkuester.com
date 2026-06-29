@@ -49,17 +49,34 @@ A dark, full-screen cover: centered **name + role + nav + a "drag and release th
 - `_source-images/` (photo originals/zips) is gitignored — only the optimized copies in `public/uploads/` ship.
 
 ## Current state & next steps
-Built and **deployed live**, including the **June 2026 redesign**: the interactive blob-field home cover, inner-page paint splotches, and the cross-fade page transition. Tests green: **e2e 34 + unit 2**.
+Built and **deployed live** at https://simonkuester.com. Everything below is shipped:
+- **June 2026 redesign** — interactive blob-field home cover, inner-page paint splotches, cross-fade transitions.
+- **Nav + theme polish (2026-06-27)** — dropped the redundant Home nav item (the wordmark links home); wordmark is now bold (700), larger (1.25rem) Cormorant serif (the 700 weight is imported in `global.css`); **accent changed from cool blue to warm terracotta** to match the warm palette: `--accent` `#A0522D` (light) / `#DDA07C` (dark) in `global.css`.
+- **Content is real** — About page fully written (`about.astro`: Genix roles, education, origin story, focus areas, outside work); **2 real projects** (`ai-detection-engineering-platform`, `strongdm-argus-integration`, cover images in `public/uploads/`); **first real blog post** (`building-this-site.md`); the old sample posts/projects are gone.
+- **Real links/assets** — LinkedIn is the real URL (Footer + `contact.astro`); `public/resume.pdf` is the real resume (~140KB, 1 page). (The header has no LinkedIn link by design — just wordmark + nav + theme toggle.)
+- **Security/infra** — HTTPS enforced + HSTS; `security.txt` at `public/.well-known/`.
 
-**NEXT UP — content (the current focus for this/next session):**
-- **About page** (`src/pages/about.astro`) — write the real bio + experience. Simon is now a **Cybersecurity Engineering Associate @ Genix Cyber** (reflected in the home role line); the About copy is still placeholder.
-- **Write-ups / blog posts** — replace the 2 sample posts in `src/content/posts/` with real writing, and add new ones. (Editable via `/admin` or by adding Markdown.)
-- **Projects** — replace the 2 sample projects in `src/content/projects/` with real work.
-- **LinkedIn URL** (hardcoded placeholder in `Header`/`Footer`/`contact.astro`) and `public/resume.pdf` (stub) — drop in the real ones.
+Always keep `test:unit` + `test:e2e` green and `npm run build` clean before pushing (pushing `main` ships to prod).
 
-**Recommended follow-ups:**
-- A **1200×630 raster OG image** (social previews currently fall back to the favicon SVG, which most platforms won't render).
-- Optional polish: tune the blob/splotch look (saturation, count, breakpoints) if desired.
+**TOMORROW (2026-06-28) — launch day: deploy + LinkedIn announcement.** Two likely content tasks, then launch QA:
+- **Add a new project** — add `src/content/projects/<slug>.md` (fields per `src/content.config.ts`: title, summary, tools, order, coverImage, …). Put any cover image in `public/uploads/` and reference it as `/uploads/<file>`. **Gotcha:** the StrongDM cover filename has a space (`strongdm logo.png`) — prefer hyphenated filenames for new ones. Or just use `/admin`.
+- **Revise the About page** (`src/pages/about.astro`) — content is already real; this is editing, not writing from scratch.
+
+**LAUNCH-READINESS CHECKLIST (before announcing on LinkedIn):**
+- [ ] **OG image — HIGH priority for the LinkedIn link preview.** `og:image` defaults to `/favicon.svg` (`BaseLayout.astro`, `image` prop), and LinkedIn/most platforms won't render an SVG, so a shared link shows **no preview image**. Create a **1200×630 PNG**, drop it in `public/`, and set the `image` default in `BaseLayout.astro` (`twitter:card` is already `summary_large_image`).
+- [ ] **Visual QA** — dark (default) + light toggle, desktop + mobile, across home/about/projects/writing/contact. (e2e already covers no-horizontal-scroll at 360/768/1280.)
+- [ ] **Proofread** — known typo in `building-this-site.md`: "what I found when I **scanned performed** a security scan" (drop "scanned"). Skim every lede/post once.
+- [ ] **Security review** — run the checklist below.
+
+**SECURITY CHECKLIST (Simon runs this before launch):**
+- [ ] `npm audit` — dependency vulnerabilities.
+- [ ] **Secret scan** — no secrets/keys/tokens in the working tree OR `git log` history (`.env`, API tokens, the GitHub OAuth App secret, Cloudflare API tokens). The OAuth secret must live only in the `sveltia-cms-auth` Worker, never in this repo.
+- [ ] **Live security headers** — confirm HSTS present + HTTP→HTTPS redirect; consider adding **CSP**, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and frame-ancestors/`X-Frame-Options` (these are Cloudflare config, not in the repo).
+- [ ] **`security.txt`** — `Contact:` correct and `Expires:` not in the past.
+- [ ] **CMS/admin** — `/admin` (Sveltia) is publicly reachable but writes require GitHub OAuth via the worker; confirm the OAuth App callback + scopes are minimal and the worker secret is set; no tokens should reach the client.
+- [ ] **Drafts** — no `draft: true` content exposed; nothing sensitive published.
+
+**Optional polish:** tune the blob/splotch look (saturation, count, breakpoints) if desired.
 
 ## Specs & plans
 - Original build: `docs/superpowers/specs/2026-06-26-personal-website-design.md`, `docs/superpowers/plans/2026-06-26-simonkuester-website.md`.
