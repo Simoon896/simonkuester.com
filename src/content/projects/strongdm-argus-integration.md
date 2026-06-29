@@ -18,11 +18,11 @@ order: 1
 
 ## Challenge
 
-Tools like StrongDM let a team share powerful admin accounts, which is convenient but creates a blind spot. When several people use the same account, the SIEM sees the account, not the person behind it. If that access gets misused or stolen, you end up tracing activity across systems to work out who actually did what, and by then the damage is usually done.
+StrongDM records what happens in privileged sessions, but those logs often sit outside the SOC's main detection workflow. The SIEM sees database queries, SSH commands, and admin actions on the target system, not the StrongDM session that authorized them. Without that session context in the XDR, privileged access is hard to monitor, correlate with other signals, or investigate when something looks wrong.
 
 ## Contribution
 
-I built the integration that closes that gap. It feeds StrongDM's privileged-session logs into Argus, our converged cybersecurity platform solution, and ties every session back to the real identity behind it along with their access level and permissions. That gives the detections actual context instead of an anonymous shared account. I added automated response on top, so Argus can cut a session, disable an account, or pull access the moment something looks out of scope. I also built the interactive demo on our site that walks people through how the whole thing works.
+I built the integration that closes that gap. It feeds StrongDM's privileged-session logs into Argus, our converged cybersecurity platform solution, and ties every session back to the real identity behind it along with their access level and permissions. That gives the detections actual context instead of raw privileged activity with no session trail. I added automated response on top, so Argus can cut a session, disable an account, or pull access the moment something looks out of scope. I also built the interactive demo on our site that walks people through how the whole thing works.
 
 ## Key decisions
 
