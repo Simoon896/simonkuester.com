@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('about leads with the story and a fact rail', async ({ page }) => {
   await page.goto('/about/');
-  await expect(page.locator('.statement')).toContainText('phished my Minecraft');
+  await expect(page.locator('.statement')).toContainText('identity and access management');
+  await expect(page.getByText('Minecraft')).toHaveCount(0);
   const rail = page.locator('.rail');
   await expect(rail).toContainText('Cybersecurity Engineering Associate');
   await expect(rail.getByRole('link', { name: 'Download resume (PDF)' })).toHaveAttribute('href', '/resume.pdf');
