@@ -4,27 +4,43 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
-import PaintSplotches from '../components/PaintSplotches.astro';
+import Onward from '../components/Onward.astro';
+import { NO_SECTION, SECTIONS, sectionForPath } from '../lib/sections';
 
 interface Props {
   title: string;
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  /** Home cover: no header, footer or onward row; a corner theme toggle instead. */
   cover?: boolean;
+  /** End the page with the row of other sections (inner pages only). */
+  onward?: boolean;
+  /** Fill exactly one screen: header, content centred in the rest, footer. */
+  fill?: boolean;
 }
 
 const {
   title,
   description = 'Simon Kuester — cybersecurity professional. Experience, projects, and writing.',
-  image = '/favicon.svg',
+  image = '/og.png',
   type = 'website',
   cover = false,
+  onward = true,
+  fill = false,
 } = Astro.props;
 
 const fullTitle = title === 'Simon Kuester' ? title : `${title} — Simon Kuester`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
+
+// Each inner page takes its section's colour for links, buttons and dots.
+const section = sectionForPath(Astro.url.pathname);
+const colors = SECTIONS.find((s) => s.id === section) ?? NO_SECTION;
+const sectionVars = cover
+  ? ''
+  : `body{--g:${colors.gradient};--accent:${colors.accentLight};--accent-contrast:#FFFFFF}` +
+    `[data-theme='dark'] body{--accent:${colors.accentDark};--accent-contrast:#0F0E0C}`;
 ---
 <!doctype html>
 <html lang="en" data-theme="dark">
@@ -49,6 +65,8 @@ const ogImage = new URL(image, Astro.site);
     <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary_large_image" />
 
+    {sectionVars && <style is:inline set:html={sectionVars}></style>}
+
     <!-- Set theme before paint, re-apply after each view transition (no flash), and
          handle the toggle via one delegated listener so it keeps working across swaps -->
     <script is:inline>
@@ -72,12 +90,12 @@ const ogImage = new URL(image, Astro.site);
       })();
     </script>
   </head>
-  <body>
+  <body data-section={cover ? undefined : (section ?? 'none')} data-fill={fill ? '' : undefined}>
     <a href="#main" class="visually-hidden">Skip to content</a>
-    {!cover && <PaintSplotches />}
     {cover ? <div class="cover-toggle"><ThemeToggle /></div> : <Header />}
     <main id="main">
       <slot />
+      {!cover && onward && <Onward current={section} />}
     </main>
     {!cover && <Footer />}
   </body>

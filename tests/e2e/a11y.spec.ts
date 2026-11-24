@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const paths = ['/', '/about/', '/projects/', '/writing/', '/contact/'];
+const paths = ['/', '/about/', '/work/', '/contact/'];
 
 test('html has lang attribute', async ({ page }) => {
   await page.goto('/');

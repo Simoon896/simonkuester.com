@@ -1,19 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
 
-const focus = [
-  'Detection engineering',
-  'Security automation',
-  'SIEM / XDR',
-  'NIST & CMMC compliance',
-  'IAM / PAM',
-];
+const role = 'Cybersecurity Engineering Associate';
 
 const experience = [
   {
-    period: 'Mar 2026 – Present',
-    role: 'Cybersecurity Associate',
+    period: 'Mar 2026 – present',
+    role,
     org: 'Genix Cyber',
     note: "I work on detection content and active-response automation for our Wazuh-based XDR, and I manage the technical side of our StrongDM partnership. I built the integration that pulls StrongDM session logs into our XDR, so actions taken on privileged accounts trace back to the actual person who took them. I've also written 75+ detection rules mapped to MITRE ATT&CK and tied a lot of that work to NIST and CMMC controls.",
   },
@@ -21,61 +14,67 @@ const experience = [
     period: 'Jan 2026 – Mar 2026',
     role: 'Cybersecurity Engineering Intern',
     org: 'Genix Cyber',
-    note: "I built and tested detection use cases across a bunch of MITRE ATT&CK techniques, and put together an automated malware-response workflow (file-integrity monitoring, VirusTotal, and custom YARA rules) that deletes a malicious file within seconds of catching it, no analyst needed.",
+    note: 'I built and tested detection use cases across a bunch of MITRE ATT&CK techniques, and put together an automated malware-response workflow (file-integrity monitoring, VirusTotal, and custom YARA rules) that deletes a malicious file within seconds of catching it, no analyst needed.',
   },
 ];
+
+const certs = ['CompTIA Security+', 'StrongDM Deployment Expert', 'CompTIA A+'];
 ---
-<BaseLayout title="About" description="About Simon Kuester, a cybersecurity associate at Genix Cyber working on detection, automation, and privileged access.">
-  <Container>
-    <h1>About</h1>
+<BaseLayout title="About" description={`About Simon Kuester, a ${role.toLowerCase()} at Genix Cyber working on detection, automation, and privileged access.`}>
+  <div class="page">
+    <h1 class="visually-hidden">About</h1>
+    <p class="statement">I first got into security after someone phished my Minecraft account when I was a kid. I was annoyed, then I got curious about how they pulled it off and how I could've stopped them. That curiosity stuck.</p>
 
-    <p class="lede">I first got into security after someone phished my Minecraft
-      account when I was a kid. I was annoyed, then I got curious about how they
-      pulled it off and how I could've stopped them. That curiosity stuck.</p>
+    <div class="cols">
+      <aside class="rail" aria-label="At a glance">
+        <dl>
+          <div><dt>Role</dt><dd>{role}</dd></div>
+          <div><dt>Company</dt><dd>Genix Cyber</dd></div>
+          <div><dt>Education</dt><dd>B.S. in Cybersecurity, University of North Georgia (2025, 3.84 GPA)</dd></div>
+          <div><dt>Certifications</dt><dd><ul>{certs.map((c) => <li>{c}</li>)}</ul></dd></div>
+        </dl>
+        <p class="after"><a class="btn" href="/resume.pdf">Download resume (PDF)</a></p>
+      </aside>
 
-    <p>I'm a cybersecurity associate at Genix Cyber, where
-      I work on threat detection and automated response. What I like about the job is
-      the visibility: making sense of what's happening across a lot of different
-      tools, then building flows that catch a threat and deal with it on their own,
-      without waiting on a person. Getting those systems tuned until they run clean
-      and quiet is the part I find most satisfying.</p>
+      <div class="essay">
+        <p>I'm a cybersecurity engineering associate at Genix Cyber, where I work on threat
+          detection and automated response. What I like about the job is the visibility:
+          making sense of what's happening across a lot of different tools, then building
+          flows that catch a threat and deal with it on their own, without waiting on a
+          person. Getting those systems tuned until they run clean and quiet is the part I
+          find most satisfying.</p>
 
-    <p>Lately I keep getting pulled toward identity and access. After some hands-on
-      work with StrongDM, our privileged-access partner, I got into IAM and PAM, and
-      that's the direction I want to take my career.</p>
+        <p>Lately I keep getting pulled toward identity and access. After some hands-on work
+          with StrongDM, our privileged-access partner, I got into IAM and PAM, and that's the
+          direction I want to take my career.</p>
 
-    <h2>Focus areas</h2>
-    <ul class="focus">{focus.map((f) => <li>{f}</li>)}</ul>
+        <h2 class="serif-h2">Experience</h2>
+        <ol class="jobs">
+          {experience.map((e) => (
+            <li>
+              <h3>{e.role}</h3>
+              <p class="where">{e.org}, {e.period}</p>
+              <p>{e.note}</p>
+            </li>
+          ))}
+        </ol>
 
-    <h2>Experience</h2>
-    <ul class="timeline">
-      {experience.map((e) => (
-        <li>
-          <p class="meta">{e.period}</p>
-          <p class="role"><strong>{e.role}</strong> · {e.org}</p>
-          <p>{e.note}</p>
-        </li>
-      ))}
-    </ul>
-    <p class="note">Before joining Genix Cyber, I finished my B.S. in Cybersecurity at the
-      University of North Georgia (2025, 3.84 GPA), and I've got certifications such as CompTIA Security+, StrongDM Deployment Expert, and CompTIA A+.</p>
-
-    <h2>Outside work</h2>
-    <p>Outside of my day to day work, I love to play video games! I'm a Top 100 tank player
-      in Overwatch, and I've played collegiate Marvel Rivals, taking 1st in the PBC and 2nd in the country in the NECC.</p>
-
-    <p><a class="btn" href="/resume.pdf">Download resume (PDF)</a></p>
-  </Container>
+        <h2 class="serif-h2">Outside work</h2>
+        <p>Outside of my day to day work, I love to play video games! I'm a Top 100 tank player
+          in Overwatch, and I've played collegiate Marvel Rivals, taking 1st in the PBC and 2nd
+          in the country in the NECC.</p>
+      </div>
+    </div>
+  </div>
 </BaseLayout>
 
 <style>
-  .lede { font-size: 1.2rem; color: var(--muted); }
-  .focus { display: flex; gap: var(--space-2); flex-wrap: wrap; list-style: none; padding: 0; margin-top: var(--space-3); }
-  .focus li { border: 1px solid var(--hairline); border-radius: 999px; padding: 0.2rem 0.7rem; font-size: 0.85rem; }
-  .timeline { list-style: none; padding: 0; }
-  .timeline li { border-left: 2px solid var(--hairline); padding: 0 0 var(--space-4) var(--space-3); }
-  .timeline .role { margin: 0.1rem 0; }
-  .note { color: var(--muted); font-size: 0.95rem; }
-  .btn { display: inline-block; background: var(--accent); color: var(--accent-contrast); padding: 0.6rem 1.2rem; border-radius: 8px; }
-  .btn:hover { text-decoration: none; opacity: 0.92; }
+  .essay p { margin: 0 0 var(--space-3); }
+  .jobs { list-style: none; margin: 0; padding: 0; }
+  .jobs li + li { margin-top: 2rem; }
+  .jobs h3 {
+    font-family: var(--font-display); font-weight: 600; font-size: 1.5rem;
+    letter-spacing: 0; line-height: 1.15; margin: 0;
+  }
+  .jobs .where { color: var(--muted); font-size: 0.92rem; margin: 0.15rem 0 0.7rem; }
 </style>

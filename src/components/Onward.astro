@@ -1,0 +1,26 @@
+---
+// The row of other sections that ends an inner page, in large serif type, each
+// with a dot in its own colour. No rule above it: it sits after a gap and
+// blends into the page. Pages outside a section (the 404) list all three.
+import { SECTIONS, type SectionId } from '../lib/sections';
+
+interface Props { current: SectionId | null; }
+const { current } = Astro.props;
+const others = SECTIONS.filter((s) => s.id !== current);
+---
+<div class="page">
+  <nav class="onward" aria-label="Other sections">
+    {others.map((s) => (
+      <a href={s.href} style={`--g:${s.gradient}`}>{s.label}<span class="dot" aria-hidden="true"></span></a>
+    ))}
+  </nav>
+</div>
+<style>
+  .onward { display: flex; flex-wrap: wrap; gap: 0.5rem 3rem; margin-top: clamp(3.5rem, 8vw, 6rem); }
+  .onward a {
+    font-family: var(--font-display); font-weight: 600; color: var(--ink);
+    font-size: clamp(1.8rem, 4.2vw, 3rem); line-height: 1.1;
+  }
+  .onward a:hover { text-decoration: none; }
+  .onward a:hover .dot { transform: scale(1.25); }
+</style>

@@ -1,8 +1,9 @@
 ---
+// A project: the title leads, what it was built with and its links sit in a rail,
+// and the write-up opens on the summary as a larger serif lead.
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
-import Tag from '../../components/Tag.astro';
+import { isLogoShaped, publicImageSize } from '../../utils/image-size';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -12,25 +13,52 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const d = project.data;
+const size = d.coverImage ? publicImageSize(d.coverImage) : null;
+const logo = size ? isLogoShaped(size) : false;
 ---
 <BaseLayout title={d.title} description={d.summary} type="article">
-  <Container>
-    <article class="prose">
-      <h1>{d.title}</h1>
-      <p class="lede">{d.summary}</p>
-      <div class="tools">{d.tools.map((t) => <Tag label={t} />)}</div>
-      {d.coverImage && <img class="cover" src={d.coverImage} alt="" />}
-      <Content />
-      {d.links.length > 0 && (
-        <p class="links">{d.links.map((l) => <a href={l.url}>{l.label} →</a>)}</p>
-      )}
-      <p><a href="/projects/">← All projects</a></p>
-    </article>
-  </Container>
+  <div class="page">
+    <h1 class="statement">{d.title}</h1>
+
+    <div class="cols">
+      <aside class="rail" aria-label="About this project">
+        <dl>
+          <div><dt>When</dt><dd>{d.period}</dd></div>
+          {d.tools.length > 0 && <div><dt>Built with</dt><dd><ul>{d.tools.map((t) => <li>{t}</li>)}</ul></dd></div>}
+          {d.links.length > 0 && (
+            <div><dt>Links</dt><dd><ul>{d.links.map((l) => <li><a href={l.url}>{l.label}</a></li>)}</ul></dd></div>
+          )}
+        </dl>
+        <p class="after"><a href="/work/">All work</a></p>
+      </aside>
+
+      <article class="prose">
+        <p class="lead">{d.summary}</p>
+        {d.coverImage && (
+          <div class:list={['cover-wrap', { logo }]}>
+            <img class="cover" src={d.coverImage} alt="" width={size?.width} height={size?.height} />
+          </div>
+        )}
+        <Content />
+      </article>
+    </div>
+  </div>
 </BaseLayout>
+
 <style>
-  .lede { font-size: 1.15rem; color: var(--muted); }
-  .cover { display: block; width: 100%; height: auto; border-radius: var(--radius); margin: var(--space-4) 0; }
-  .tools { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
-  .links { display: flex; gap: var(--space-4); }
+  h1.statement { max-width: 16em; }
+  .prose .lead {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(1.45rem, 2.3vw, 1.9rem); line-height: 1.26; margin: 0 0 2rem;
+  }
+  .cover-wrap { margin: 0 0 2.5rem; }
+  .cover { display: block; height: auto; border-radius: var(--radius); }
+  .cover-wrap.logo {
+    background: #FAF9F7; border-radius: var(--radius);
+    display: grid; place-items: center; padding: 2.5rem 2rem;
+  }
+  .cover-wrap.logo .cover { max-width: min(100%, 22rem); border-radius: 0; }
+  @media (min-width: 1040px) {
+    .cover-wrap:not(.logo) .cover { width: calc(100% + 4.5rem); max-width: none; }
+  }
 </style>

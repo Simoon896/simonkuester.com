@@ -1,10 +1,11 @@
 ---
+// A post: the title leads, the cover photo (if any) runs the full page width,
+// details sit in a rail, and the text runs at reading width beside it.
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import Tag from '../../components/Tag.astro';
 import { readingTime } from '../../utils/reading-time';
+import { publicImageSize } from '../../utils/image-size';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -14,16 +15,37 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const d = post.data;
+const cover = d.coverImage ? { src: d.coverImage, size: publicImageSize(d.coverImage) } : null;
 ---
-<BaseLayout title={d.title} description={d.summary} type="article">
-  <Container>
-    <article class="prose">
-      <p class="meta"><FormattedDate date={d.date} /> · {readingTime(post.body ?? '')}</p>
-      <h1>{d.title}</h1>
-      <Content />
-      <div class="tags">{d.tags.map((t) => <Tag label={t} />)}</div>
-      <p><a href="/writing/">← All writing</a></p>
-    </article>
-  </Container>
+<BaseLayout title={d.title} description={d.summary} type="article" image={d.coverImage}>
+  <div class="page">
+    <h1 class="statement">{d.title}</h1>
+
+    {cover && (
+      <img class="hero" src={cover.src} alt={d.coverAlt ?? d.title}
+        width={cover.size?.width} height={cover.size?.height} />
+    )}
+
+    <div class="cols">
+      <aside class="rail" aria-label="About this post">
+        <dl>
+          <div><dt>Posted</dt><dd><FormattedDate date={d.date} /></dd></div>
+          <div><dt>Reading time</dt><dd>{readingTime(post.body ?? '')}</dd></div>
+          {d.tags.length > 0 && <div><dt>Topics</dt><dd><ul>{d.tags.map((t) => <li>{t}</li>)}</ul></dd></div>}
+        </dl>
+        <p class="after"><a href="/work/">All work</a></p>
+      </aside>
+
+      <article class="prose"><Content /></article>
+    </div>
+  </div>
 </BaseLayout>
-<style>.tags { display: flex; gap: var(--space-2); flex-wrap: wrap; margin: var(--space-4) 0; }</style>
+
+<style>
+  h1.statement { max-width: 18em; margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .hero {
+    display: block; width: 100%; height: auto; aspect-ratio: 2 / 1;
+    object-fit: cover; object-position: center 58%;
+    border-radius: var(--radius); margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+</style>

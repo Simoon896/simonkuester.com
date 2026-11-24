@@ -1,27 +1,88 @@
 ---
+// Contact: a single screen. The email address is the main event, one click to
+// write and one to copy, with the other places to find Simon underneath.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
 
-const links = [
-  { label: 'Email', value: 'simonkuester@gmail.com', href: 'mailto:simonkuester@gmail.com' },
+const email = 'simonkuester@gmail.com';
+const elsewhere = [
   { label: 'GitHub', value: 'github.com/Simoon896', href: 'https://github.com/Simoon896' },
   { label: 'LinkedIn', value: 'linkedin.com/in/simonkuester', href: 'https://www.linkedin.com/in/simonkuester/' },
+  { label: 'Resume', value: 'One page, PDF', href: '/resume.pdf' },
 ];
 ---
-<BaseLayout title="Contact" description="Get in touch with Simon Kuester.">
-  <Container>
-    <h1>Contact</h1>
-    <p class="lede">Want to discuss about something? Shoot me an email and I'll be sure to get back to you.</p>
-    <ul class="contacts">
-      {links.map((l) => (
-        <li><span class="label">{l.label}</span> <a href={l.href}>{l.value}</a></li>
-      ))}
-    </ul>
-  </Container>
+<BaseLayout title="Contact" description="Get in touch with Simon Kuester." onward={false} fill>
+  <div class="page">
+    <div class="reach">
+      <h1 class="visually-hidden">Contact</h1>
+      <p class="statement">Want to talk about something? Shoot me an email and I'll get back to you.</p>
+
+      <p class="email"><a href={`mailto:${email}`}>{email}</a></p>
+      <p class="copy">
+        <button class="btn" type="button" data-copy={email}>Copy email</button>
+        <span class="copied" role="status" aria-live="polite"></span>
+      </p>
+
+      <ul class="elsewhere">
+        {elsewhere.map((l) => (
+          <li>
+            <p class="label">{l.label}</p>
+            <a href={l.href}>{l.value}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
 </BaseLayout>
+
 <style>
-  .lede { color: var(--muted); max-width: 32em; }
-  .contacts { list-style: none; padding: 0; }
-  .contacts li { padding: var(--space-2) 0; border-bottom: 1px solid var(--hairline); }
-  .label { display: inline-block; width: 6rem; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .reach { margin-block: auto; padding-block: clamp(1.5rem, 4vh, 3rem); }
+  .statement { margin: 0 0 clamp(1.25rem, 3vh, 2rem); font-size: clamp(1.5rem, 2.6vw, 2rem); }
+  .email { margin: 0; }
+  .email a {
+    font-family: var(--font-display); font-weight: 500; letter-spacing: -0.02em; color: var(--ink);
+    font-size: clamp(1.75rem, 8.2vw, 6rem); line-height: 1; overflow-wrap: anywhere;
+    text-decoration: underline; text-decoration-color: transparent;
+    text-decoration-thickness: 0.04em; text-underline-offset: 0.12em;
+    transition: text-decoration-color 0.2s ease;
+  }
+  .email a:hover { text-decoration-color: var(--accent); }
+  .copy { display: flex; align-items: center; gap: 0.9rem; margin: 1.5rem 0 0; }
+  .copied { color: var(--muted); font-size: 0.92rem; }
+
+  .elsewhere {
+    list-style: none; padding: 0; margin: clamp(2.5rem, 7vh, 4.5rem) 0 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 3rem;
+  }
+  .label { margin: 0 0 0.2rem; color: var(--muted); font-size: 0.92rem; }
+  .elsewhere a {
+    font-family: var(--font-display); font-weight: 600; color: var(--ink);
+    font-size: clamp(1.25rem, 2vw, 1.55rem); line-height: 1.2; overflow-wrap: anywhere;
+  }
+  .elsewhere a:hover { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 760px) { .elsewhere { grid-template-columns: 1fr; } }
 </style>
+
+<script>
+  // Copy the address. Bound on every page load so it works after View Transitions.
+  function initCopy() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+      let timer = 0;
+      btn.addEventListener('click', async () => {
+        const note = btn.parentElement?.querySelector('.copied');
+        if (!note) return;
+        try {
+          await navigator.clipboard.writeText(btn.dataset.copy || '');
+          note.textContent = 'Copied';
+        } catch {
+          note.textContent = 'Could not copy. Select the address above instead.';
+        }
+        clearTimeout(timer);
+        timer = window.setTimeout(() => { note.textContent = ''; }, 2500);
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', initCopy);
+</script>

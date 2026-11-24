@@ -40,9 +40,6 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Keep page content above the decorative paint splotches (fixed at z:0) */
-body > header, body > main, body > footer { position: relative; z-index: 1; }
-
 h1 { font-family: var(--font-display); font-weight: 600; line-height: 1.04; letter-spacing: 0; font-size: clamp(2.4rem, 6vw, 3.6rem); }
 h2, h3, h4 { font-family: var(--font-sans); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
 h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
@@ -54,25 +51,90 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 img { max-width: 100%; height: auto; }
 
-.prose { max-width: var(--maxw-prose); margin: 0 auto; }
-.prose p, .prose ul, .prose ol { margin: 0 0 var(--space-3); }
-.prose h2 { margin: var(--space-5) 0 var(--space-2); font-family: var(--font-sans); }
-.prose blockquote {
-  margin: var(--space-3) 0; padding: 0.25rem 0 0.25rem 1.1rem;
-  border-left: 3px solid var(--accent); color: var(--muted); font-style: italic;
+.meta { color: var(--muted); font-size: 0.9rem; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+
+/* ---------- Inner pages ---------- */
+
+/* One page width, aligned with the header, so wordmark, statement and content share a left edge */
+.page { max-width: var(--maxw-page); margin-inline: auto; padding-inline: var(--space-3); }
+
+/* The opening line every inner page leads with */
+.statement {
+  font-family: var(--font-display); font-weight: 500; letter-spacing: -0.005em;
+  font-size: clamp(1.9rem, 3.8vw, 2.9rem); line-height: 1.15; color: var(--ink);
+  max-width: 22em; margin: clamp(1.75rem, 4vw, 3rem) 0 clamp(2rem, 4.5vw, 3.25rem);
+}
+
+/* Rail of facts beside a text column */
+.cols { display: grid; grid-template-columns: 15rem minmax(0, var(--maxw-prose)); column-gap: 4.5rem; }
+.rail { align-self: start; position: sticky; top: 2rem; font-size: 0.95rem; }
+.rail dl { margin: 0; }
+.rail dl > div { padding: 0.8rem 0; border-bottom: 1px solid var(--hairline); }
+.rail dl > div:first-child { padding-top: 0.2rem; }
+.rail dt { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.1rem; }
+.rail dd { margin: 0; line-height: 1.5; }
+.rail ul { list-style: none; margin: 0; padding: 0; }
+.rail .after { margin: 1.25rem 0 0; }
+@media (max-width: 900px) {
+  .cols { grid-template-columns: 1fr; row-gap: 2.5rem; }
+  .rail { position: static; }
+}
+
+.serif-h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 2rem;
+  letter-spacing: 0; line-height: 1.1; margin: 3.25rem 0 1.25rem;
+}
+
+.btn {
+  display: inline-block; background: var(--accent); color: var(--accent-contrast);
+  padding: 0.5rem 1.05rem; border-radius: 999px; font-weight: 500; font-size: 0.92rem;
+  border: 0; font-family: inherit; line-height: 1.5; cursor: pointer;
+}
+.btn:hover { text-decoration: none; opacity: 0.9; }
+
+/* A small ball in a section's colour (set --g on the element or an ancestor) */
+.dot {
+  display: inline-block; width: 0.34em; height: 0.34em; margin-left: 0.12em;
+  background: var(--g); border-radius: 48% 52% 54% 46% / 52% 46% 54% 48%;
+  transition: transform 0.25s ease;
+}
+
+/* Single-screen pages (Contact): header, content centred in what's left, footer */
+body[data-fill] { min-height: 100svh; display: flex; flex-direction: column; }
+body[data-fill] > main { flex: 1 0 auto; display: flex; flex-direction: column; }
+body[data-fill] > main > .page { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; }
+body[data-fill] > header { width: 100%; }
+body[data-fill] > footer { margin-top: 0; width: 100%; }
+
+/* ---------- Long-form text (posts, project write-ups) ---------- */
+.prose p, .prose ul, .prose ol { margin: 0 0 var(--space-3); }
+.prose h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 2rem;
+  letter-spacing: 0; line-height: 1.1; margin: 3rem 0 1rem;
+}
+.prose img { display: block; border-radius: var(--radius); margin-block: 2rem; }
+/* pictures in the text run past the words to the page's right edge: the text
+   column ends 4.5rem short of it (64rem page − 2rem padding − 15rem rail − 4.5rem gap − 38rem) */
+@media (min-width: 1040px) {
+  .prose p > img { width: calc(100% + 4.5rem); max-width: none; }
+}
+/* pull quote */
+.prose blockquote {
+  margin: 2.25rem 0; padding: 0 0 0 1.4rem; border-left: 2px solid var(--accent);
+  font-family: var(--font-display); font-weight: 500; color: var(--ink);
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem); line-height: 1.22;
+}
+.prose blockquote p { margin: 0; }
 .prose pre {
   background: var(--code-bg); border: 1px solid var(--hairline);
   border-radius: var(--radius); padding: var(--space-3); overflow-x: auto; font-size: 0.9rem;
 }
 .prose code { font-family: var(--font-mono); font-size: 0.9em; }
 .prose :not(pre) > code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 5px; }
-
-.meta { color: var(--muted); font-size: 0.9rem; }
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-}
 
 /* Page transition (Astro View Transitions): a soft, professional cross-fade — the
    new page fades up while the old fades out. Pure opacity (no transform), so it

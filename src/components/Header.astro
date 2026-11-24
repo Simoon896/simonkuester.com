@@ -1,20 +1,19 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
-const path = Astro.url.pathname;
-const items = [
-  { href: '/about/', label: 'About' },
-  { href: '/projects/', label: 'Projects' },
-  { href: '/writing/', label: 'Writing' },
-  { href: '/contact/', label: 'Contact' },
-];
-const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith(href);
+import { SECTIONS, sectionForPath } from '../lib/sections';
+
+// The current section's link is in full ink and followed by a dot in its colour.
+// That marker is how an inner page says where you are, in place of a page title.
+const current = sectionForPath(Astro.url.pathname);
 ---
 <header class="site-header">
   <a class="wordmark" href="/">Simon Kuester</a>
   <nav aria-label="Primary">
     <ul>
-      {items.map((i) => (
-        <li><a href={i.href} aria-current={isActive(i.href) ? 'page' : undefined}>{i.label}</a></li>
+      {SECTIONS.map((s) => (
+        <li>
+          <a href={s.href} aria-current={s.id === current ? 'page' : undefined} style={`--g:${s.gradient}`}>{s.label}</a>
+        </li>
       ))}
     </ul>
   </nav>
@@ -23,17 +22,27 @@ const isActive = (href: string) => href === '/' ? path === '/' : path.startsWith
 <style>
   .site-header {
     display: flex; align-items: center; gap: var(--space-4);
-    max-width: var(--maxw-page); margin-inline: auto;
-    padding: var(--space-3); border-bottom: 1px solid var(--hairline);
-    flex-wrap: wrap;
+    max-width: var(--maxw-page); margin-inline: auto; padding: var(--space-3);
   }
   .wordmark {
     font-family: var(--font-display); font-weight: 700;
-    font-size: 1.25rem; color: var(--ink);
+    font-size: 1.25rem; color: var(--ink); white-space: nowrap;
   }
+  .wordmark:hover { text-decoration: none; }
   nav { margin-inline-start: auto; }
-  nav ul { display: flex; gap: var(--space-3); list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
-  nav a { color: var(--muted); font-size: 0.95rem; }
+  nav ul { display: flex; gap: var(--space-4); list-style: none; margin: 0; padding: 0; }
+  nav a { color: var(--muted); font-size: 0.95rem; white-space: nowrap; }
+  nav a:hover { color: var(--ink); text-decoration: none; }
   nav a[aria-current='page'] { color: var(--ink); font-weight: 500; }
-  nav a:hover { color: var(--accent); }
+  nav a[aria-current='page']::after {
+    content: ''; display: inline-block; width: 0.44em; height: 0.44em; margin-left: 0.32em;
+    border-radius: 50%; background: var(--g);
+  }
+  /* stays on one line down to 360px wide */
+  @media (max-width: 420px) {
+    .site-header { gap: 0.75rem; }
+    nav ul { gap: 0.7rem; }
+    nav a { font-size: 0.88rem; }
+    .wordmark { font-size: 1.05rem; }
+  }
 </style>

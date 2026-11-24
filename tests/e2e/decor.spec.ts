@@ -14,18 +14,15 @@ test('blob field is hidden on narrow screens', async ({ page }) => {
   expect(display).toBe('none');
 });
 
-test('inner pages render decorative paint splotches on wide screens', async ({ page }) => {
+test('inner pages have no corner paint splotches', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/about/');
-  await expect(page.locator('.splotches')).toHaveAttribute('aria-hidden', 'true');
-  expect(await page.locator('.splotch').count()).toBe(3);
-  const display = await page.locator('.splotches').evaluate((el) => getComputedStyle(el).display);
-  expect(display).toBe('block');
+  await expect(page.locator('.splotches')).toHaveCount(0);
 });
 
-test('paint splotches are hidden on smaller screens', async ({ page }) => {
-  await page.setViewportSize({ width: 768, height: 900 });
+test('inner pages open on a statement and end with the onward row', async ({ page }) => {
   await page.goto('/about/');
-  const display = await page.locator('.splotches').evaluate((el) => getComputedStyle(el).display);
-  expect(display).toBe('none');
+  await expect(page.locator('.statement')).toHaveCount(1);
+  const onward = page.locator('nav[aria-label="Other sections"]');
+  await expect(onward.getByRole('link')).toHaveText(['Work', 'Contact']);
 });

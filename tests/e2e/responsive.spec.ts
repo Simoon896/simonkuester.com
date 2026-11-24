@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-const widths = [360, 768, 1280];
-const paths = ['/', '/about/', '/projects/', '/writing/', '/contact/'];
+// 1044px sits just past the 1040px breakpoint where post and project pictures
+// start running wider than the text column.
+const widths = [360, 768, 1044, 1280];
+const paths = [
+  '/', '/about/', '/work/', '/contact/',
+  '/writing/identity-week-america-2026/',
+  '/projects/ai-detection-engineering-platform/',
+];
 
 for (const width of widths) {
   for (const path of paths) {

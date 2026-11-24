@@ -25,9 +25,11 @@ npm run test:e2e   # Playwright (tests/e2e/*.spec.ts) — builds+previews itself
 
 ## Layout of the code
 - `src/pages/index.astro` — the **home blob-field cover** (see below). Uses `<BaseLayout cover>`.
-- `src/pages/{about,contact,404}.astro`, `src/pages/projects/`, `src/pages/writing/` — inner pages.
-- `src/layouts/BaseLayout.astro` — `<head>`/SEO/OG, theme bootstrap (+ delegated theme-toggle handler that survives transitions), `ClientRouter`, header/footer, and `PaintSplotches` on non-cover pages. Prop `cover` hides the header + footer and shows a corner theme toggle (home only).
-- `src/components/` — `Header`, `Footer`, `ThemeToggle`, `Container`, `BlobField` (home cover), `PaintSplotches` (inner-page corner decor), `PostCard`, `ProjectCard`, `Tag`, `FormattedDate`. `Orbit` (original photo orbit) + `BlobOrbit` (a CSS-orbit iteration) are **unused backups** of earlier home treatments — not imported, kept for reference.
+- Inner pages: `src/pages/{about,work,contact,404}.astro`, project pages `src/pages/projects/[...slug].astro`, post pages `src/pages/writing/[...slug].astro`. **Work** (`/work/`) lists projects then posts; the old `/projects/` and `/writing/` list URLs redirect to it (`redirects` in `astro.config.mjs`), while detail pages keep their `/projects/<slug>/` and `/writing/<slug>/` URLs.
+- `src/lib/sections.ts` — the three sections (About, Work, Contact): nav order, `sectionForPath()`, and each section's ball gradient + link accent (dark/light). Projects and posts count as Work.
+- `src/layouts/BaseLayout.astro` — `<head>`/SEO/OG (default share image `/og.png`; a post with a cover shares its cover), theme bootstrap (+ delegated theme-toggle handler that survives transitions), `ClientRouter`, the section colour variables, header/footer, and the `Onward` row. Props: `cover` (home only: no header/footer, corner toggle), `onward` (default true), `fill` (one-screen layout, used by Contact).
+- `src/components/` — `Header` (marks the current section with a dot in its colour), `Onward` (row of the other sections that ends each inner page), `Footer`, `ThemeToggle`, `FormattedDate`, `BlobField` (home cover), `Container` (now unused). `Orbit` + `BlobOrbit` are **unused backups** of earlier home treatments — not imported, kept for reference.
+- `src/utils/image-size.ts` — reads PNG/JPEG sizes from `public/` at build time (width/height attributes, logo-shaped covers).
 - `src/content/{posts,projects,highlights}/*.md` — content. (`highlights` now feeds only the backup photo `Orbit`; the live home is abstract.)
 - `public/admin/` — Sveltia CMS. `public/uploads/highlights/` — photos for the backup orbit.
 
@@ -37,7 +39,7 @@ A dark, full-screen cover: centered **name + role + nav + a "drag and release th
 - Shows **only ≥ 900px wide**; below that (mobile/narrow) the home is text-only. `prefers-reduced-motion` freezes it to a static spread. The field is decorative (`aria-hidden`); identity sits above it (z-index) with a theme-aware center scrim. The hint shows only ≥900px + motion-allowed (where the balls are actually draggable).
 - The blob field re-initialises on each View-Transition navigation (`astro:page-load`) and cleans up on `astro:before-swap`.
 
-**Inner pages** get sparse, flat, **crisp paint splotches** in the corners (`src/components/PaintSplotches.astro`, added by `BaseLayout` on non-cover pages): 3 per page, **seeded from the path** (each section differs — one top corner, one diagonal bottom corner, one mid-edge), slowly drifting/morphing, **behind** the content in the margins, **≥1024px only**, frozen under reduced-motion.
+**Inner pages (Nov 2026 redesign, spec `docs/superpowers/specs/2026-11-24-inner-pages-redesign-design.md`):** no page titles and no boxes. Each page opens on a large serif **statement** (`.statement`), uses a **rail of facts beside a text column** (`.cols` / `.rail`) where it fits, and ends with the **onward row** of the other sections (not on Contact). Each section takes one of the cover's ball colours for its header dot, links and buttons (About purple, Work orange, Contact pink, 404 blue). Contact is a single screen built around the email address with a copy button. Shared classes live in `global.css`. The old corner paint splotches, cards and pill tags are gone.
 
 ## Design preferences (important — the owner is particular)
 - **Minimal / editorial, quiet, dark.** Avoid: "AI gradient" looks, corny cybersecurity clichés (matrix green, terminal gimmicks), loud effects.
@@ -58,13 +60,13 @@ Built and **deployed live** at https://simonkuester.com. Everything below is shi
 
 Always keep `test:unit` + `test:e2e` green and `npm run build` clean before pushing (pushing `main` ships to prod).
 
-**TOMORROW (2026-06-28) — launch day: deploy + LinkedIn announcement.** Two likely content tasks, then launch QA:
-- **Add a new project** — add `src/content/projects/<slug>.md` (fields per `src/content.config.ts`: title, summary, tools, order, coverImage, …). Put any cover image in `public/uploads/` and reference it as `/uploads/<file>`. **Gotcha:** the StrongDM cover filename has a space (`strongdm logo.png`) — prefer hyphenated filenames for new ones. Or just use `/admin`.
-- **Revise the About page** (`src/pages/about.astro`) — content is already real; this is editing, not writing from scratch.
+**November 2026 refresh:** dependencies updated (npm audit clean), the inner pages redesigned (see above), and a second post (`identity-week-america-2026.md`, Identity Week America, Sep 2026, photos in `public/uploads/identity-week-2026/`). Job title everywhere on the site is **"Cybersecurity Engineering Associate"** — `public/resume.pdf` still says "Cybersecurity Associate" until Simon replaces it. Next after the site: updating Simon's LinkedIn profile.
+
+**Adding content:** a project is `src/content/projects/<slug>.md`, a post is `src/content/posts/<slug>.md` (fields per `src/content.config.ts`; posts can set `coverImage` + `coverAlt`). Put images in `public/uploads/` with hyphenated filenames (the StrongDM cover's space in `strongdm logo.png` is a known wart). Or use `/admin`.
 
 **LAUNCH-READINESS CHECKLIST (before announcing on LinkedIn):**
-- [ ] **OG image — HIGH priority for the LinkedIn link preview.** `og:image` defaults to `/favicon.svg` (`BaseLayout.astro`, `image` prop), and LinkedIn/most platforms won't render an SVG, so a shared link shows **no preview image**. Create a **1200×630 PNG**, drop it in `public/`, and set the `image` default in `BaseLayout.astro` (`twitter:card` is already `summary_large_image`).
-- [ ] **Visual QA** — dark (default) + light toggle, desktop + mobile, across home/about/projects/writing/contact. (e2e already covers no-horizontal-scroll at 360/768/1280.)
+- [x] **OG image** — `public/og.png` (1200×630, name + role + cover balls) is the default share image.
+- [ ] **Visual QA** — dark (default) + light toggle, desktop + mobile, across home/about/work/contact and a post + project. (e2e covers no-horizontal-scroll at 360/768/1280.)
 - [ ] **Proofread** — known typo in `building-this-site.md`: "what I found when I **scanned performed** a security scan" (drop "scanned"). Skim every lede/post once.
 - [ ] **Security review** — run the checklist below.
 

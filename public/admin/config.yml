@@ -21,6 +21,7 @@ collections:
       - { name: "summary", label: "Summary", widget: "text" }
       - { name: "tags", label: "Tags", widget: "list", default: [], required: false }
       - { name: "coverImage", label: "Cover image", widget: "image", required: false }
+      - { name: "coverAlt", label: "Cover image description", widget: "string", required: false, hint: "What the cover photo shows, for screen readers" }
       - { name: "draft", label: "Draft", widget: "boolean", default: false }
       - { name: "body", label: "Body", widget: "markdown" }
 
