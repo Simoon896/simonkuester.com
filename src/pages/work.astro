@@ -1,22 +1,16 @@
 ---
-// Work: projects and writing on one page. No cards and no borders. Each entry is
-// an open row across the page: date on the left, a serif title and summary in the
-// middle, and a picture on the right when the entry has one.
+// Work: projects and writing on one page, straight into the list with no opening
+// sentence. No cards, no borders and no pictures: each entry is an open row with
+// its date on the left and a serif title and summary beside it. The pictures live
+// on the project and post pages themselves.
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { isLogoShaped, publicImageSize } from '../utils/image-size';
 
 const projects = (await getCollection('projects'))
   .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
 const posts = (await getCollection('posts', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-const picture = (src?: string) => {
-  if (!src) return null;
-  const size = publicImageSize(src);
-  return { src, size, logo: size ? isLogoShaped(size) : false };
-};
 
 const groups = [
   {
@@ -24,7 +18,7 @@ const groups = [
     rows: projects.map((p) => ({
       href: `/projects/${p.id}/`, title: p.data.title, summary: p.data.summary,
       when: p.data.period, date: undefined as Date | undefined,
-      tools: p.data.tools.join(', '), pic: picture(p.data.coverImage),
+      tools: p.data.tools.join(', '),
     })),
   },
   {
@@ -32,7 +26,7 @@ const groups = [
     rows: posts.map((p) => ({
       href: `/writing/${p.id}/`, title: p.data.title, summary: p.data.summary,
       when: undefined as string | undefined, date: p.data.date,
-      tools: '', pic: picture(p.data.coverImage),
+      tools: '',
     })),
   },
 ];
@@ -40,8 +34,6 @@ const groups = [
 <BaseLayout title="Work" description="Projects and writing by Simon Kuester: detection engineering, security automation, and identity.">
   <div class="page">
     <h1 class="visually-hidden">Work</h1>
-    <p class="statement">Projects I've built and posts I've written. I keep adding to this page as I make new things.</p>
-
     {groups.map((g) => (
       <section>
         <h2 class="group">{g.heading}</h2>
@@ -53,11 +45,6 @@ const groups = [
               <p class="summary">{r.summary}</p>
               {r.tools && <p class="tools">{r.tools}</p>}
             </div>
-            {r.pic && (
-              <a class:list={['thumb', { logo: r.pic.logo }]} href={r.href} tabindex="-1" aria-hidden="true">
-                <img src={r.pic.src} alt="" loading="lazy" width={r.pic.size?.width} height={r.pic.size?.height} />
-              </a>
-            )}
           </article>
         ))}
       </section>
@@ -70,14 +57,16 @@ const groups = [
     font-family: var(--font-display); font-weight: 600; font-size: 2rem;
     letter-spacing: 0; line-height: 1.1; margin: 0 0 0.5rem;
   }
+  /* no statement above the list, so the first group brings the page's top spacing */
+  section:first-of-type { margin-top: clamp(1.75rem, 4vw, 3rem); }
   section + section { margin-top: clamp(3rem, 6vw, 4.5rem); }
 
   .row {
-    display: grid; grid-template-columns: 9rem minmax(0, 1fr) 19rem; column-gap: 3rem;
-    align-items: start; padding-block: 1.75rem;
+    display: grid; grid-template-columns: 9rem minmax(0, 1fr); column-gap: 3rem;
+    align-items: start; padding-block: 1.5rem;
   }
   .when { margin: 0.55rem 0 0; color: var(--muted); font-size: 0.92rem; }
-  .main { max-width: 34rem; }
+  .main { max-width: 40rem; }
   h3 {
     font-family: var(--font-display); font-weight: 600; letter-spacing: -0.005em;
     font-size: clamp(1.6rem, 2.9vw, 2.2rem); line-height: 1.1; margin: 0 0 0.6rem;
@@ -87,14 +76,8 @@ const groups = [
   .summary { margin: 0; }
   .tools { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.92rem; }
 
-  .thumb { display: block; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; }
-  .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-  .thumb.logo { background: #FAF9F7; display: grid; place-items: center; padding: 1.75rem; }
-  .thumb.logo img { height: auto; object-fit: contain; }
-
   @media (max-width: 900px) {
-    .row { grid-template-columns: 1fr; row-gap: 0.75rem; }
+    .row { grid-template-columns: 1fr; row-gap: 0.5rem; }
     .when { margin-top: 0; }
-    .thumb { order: -1; max-width: 26rem; }
   }
 </style>

@@ -5,16 +5,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const email = 'simonkuester@gmail.com';
 const elsewhere = [
-  { label: 'GitHub', value: 'github.com/Simoon896', href: 'https://github.com/Simoon896' },
   { label: 'LinkedIn', value: 'linkedin.com/in/simonkuester', href: 'https://www.linkedin.com/in/simonkuester/' },
   { label: 'Resume', value: 'One page, PDF', href: '/resume.pdf' },
 ];
 ---
-<BaseLayout title="Contact" description="Get in touch with Simon Kuester." onward={false} fill>
+<BaseLayout title="Contact" description="Get in touch with Simon Kuester." fill>
   <div class="page">
     <div class="reach">
       <h1 class="visually-hidden">Contact</h1>
-      <p class="statement">Want to talk about something? Shoot me an email and I'll get back to you.</p>
+      <p class="statement">Get in touch.</p>
 
       <p class="email"><a href={`mailto:${email}`}>{email}</a></p>
       <p class="copy">
@@ -51,7 +50,7 @@ const elsewhere = [
 
   .elsewhere {
     list-style: none; padding: 0; margin: clamp(2.5rem, 7vh, 4.5rem) 0 0;
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 3rem;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 19rem)); gap: 1.5rem 3rem;
   }
   .label { margin: 0 0 0.2rem; color: var(--muted); font-size: 0.92rem; }
   .elsewhere a {

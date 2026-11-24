@@ -4,6 +4,8 @@ import { SECTIONS, sectionForPath } from '../lib/sections';
 
 // The current section's link is in full ink and followed by a dot in its colour.
 // That marker is how an inner page says where you are, in place of a page title.
+// The dot is a real element with its own view-transition-name, so when you move
+// between tabs it glides from one link to the next and changes colour on the way.
 const current = sectionForPath(Astro.url.pathname);
 ---
 <header class="site-header">
@@ -12,7 +14,7 @@ const current = sectionForPath(Astro.url.pathname);
     <ul>
       {SECTIONS.map((s) => (
         <li>
-          <a href={s.href} aria-current={s.id === current ? 'page' : undefined} style={`--g:${s.gradient}`}>{s.label}</a>
+          <a href={s.href} aria-current={s.id === current ? 'page' : undefined} style={`--g:${s.gradient}`}>{s.label}{s.id === current && <span class="nav-dot" aria-hidden="true"></span>}</a>
         </li>
       ))}
     </ul>
@@ -23,6 +25,8 @@ const current = sectionForPath(Astro.url.pathname);
   .site-header {
     display: flex; align-items: center; gap: var(--space-4);
     max-width: var(--maxw-page); margin-inline: auto; padding: var(--space-3);
+    /* lets the intro measure the header's own width (cqw) to find its middle */
+    container-type: inline-size;
   }
   .wordmark {
     font-family: var(--font-display); font-weight: 700;
@@ -34,9 +38,9 @@ const current = sectionForPath(Astro.url.pathname);
   nav a { color: var(--muted); font-size: 0.95rem; white-space: nowrap; }
   nav a:hover { color: var(--ink); text-decoration: none; }
   nav a[aria-current='page'] { color: var(--ink); font-weight: 500; }
-  nav a[aria-current='page']::after {
-    content: ''; display: inline-block; width: 0.44em; height: 0.44em; margin-left: 0.32em;
-    border-radius: 50%; background: var(--g);
+  .nav-dot {
+    display: inline-block; width: 0.44em; height: 0.44em; margin-left: 0.32em;
+    border-radius: 50%; background: var(--g); view-transition-name: nav-dot;
   }
   /* stays on one line down to 360px wide */
   @media (max-width: 420px) {
@@ -44,5 +48,33 @@ const current = sectionForPath(Astro.url.pathname);
     nav ul { gap: 0.7rem; }
     nav a { font-size: 0.88rem; }
     .wordmark { font-size: 1.05rem; }
+  }
+
+  /* Intro, played when the header first appears (a fresh page load, or arriving from
+     the home cover, which has no header). The name fades in at the middle of the
+     header, slides to its place on the left, and the theme button and the tabs slide
+     out to the right one after another. html.intro is set and cleared by a small
+     script in BaseLayout; moving between tabs does not replay it. Only opacity and
+     transform animate, and it holds until the display font is in (fonts-pending). */
+  @keyframes mark-in {
+    0% { opacity: 0; transform: translateX(calc(50cqw - 50%)); }
+    24% { opacity: 1; transform: translateX(calc(50cqw - 50%)); animation-timing-function: cubic-bezier(.65, 0, .2, 1); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes tab-out { from { opacity: 0; transform: translateX(-20cqw); } }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.intro) .wordmark { animation: mark-in 1.5s ease both; will-change: opacity, transform; }
+    :global(html.intro) nav li, :global(html.intro) .site-header :global(#theme-toggle) {
+      animation: tab-out 0.95s cubic-bezier(.22, 1, .36, 1) both; will-change: opacity, transform;
+    }
+    /* the rightmost goes first, so the row opens out to the right without the tabs
+       ever sliding over one another */
+    :global(html.intro) .site-header :global(#theme-toggle) { animation-delay: 0.62s; }
+    :global(html.intro) nav li:nth-child(3) { animation-delay: 0.69s; }
+    :global(html.intro) nav li:nth-child(2) { animation-delay: 0.76s; }
+    :global(html.intro) nav li:nth-child(1) { animation-delay: 0.83s; }
+    :global(html.intro.fonts-pending) .wordmark,
+    :global(html.intro.fonts-pending) nav li,
+    :global(html.intro.fonts-pending) .site-header :global(#theme-toggle) { animation-play-state: paused; }
   }
 </style>

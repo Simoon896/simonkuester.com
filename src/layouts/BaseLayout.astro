@@ -4,18 +4,19 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
-import Onward from '../components/Onward.astro';
 import { NO_SECTION, SECTIONS, sectionForPath } from '../lib/sections';
+// The animated names are set in these faces, so each page preloads the one it opens
+// with: the big name on the home cover (600) or the header wordmark (700).
+import coverFont from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2?url';
+import wordmarkFont from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-700-normal.woff2?url';
 
 interface Props {
   title: string;
   description?: string;
   image?: string;
   type?: 'website' | 'article';
-  /** Home cover: no header, footer or onward row; a corner theme toggle instead. */
+  /** Home cover: no header or footer; a corner theme toggle instead. */
   cover?: boolean;
-  /** End the page with the row of other sections (inner pages only). */
-  onward?: boolean;
   /** Fill exactly one screen: header, content centred in the rest, footer. */
   fill?: boolean;
 }
@@ -26,7 +27,6 @@ const {
   image = '/og.png',
   type = 'website',
   cover = false,
-  onward = true,
   fill = false,
 } = Astro.props;
 
@@ -34,7 +34,7 @@ const fullTitle = title === 'Simon Kuester' ? title : `${title} — Simon Kueste
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
 
-// Each inner page takes its section's colour for links, buttons and dots.
+// Each inner page takes its section's colour for links, buttons and the header dot.
 const section = sectionForPath(Astro.url.pathname);
 const colors = SECTIONS.find((s) => s.id === section) ?? NO_SECTION;
 const sectionVars = cover
@@ -58,6 +58,8 @@ const sectionVars = cover
 
     <ClientRouter />
 
+    <link rel="preload" as="font" type="font/woff2" href={cover ? coverFont : wordmarkFont} crossorigin />
+
     <meta property="og:type" content={type} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -68,12 +70,14 @@ const sectionVars = cover
     {sectionVars && <style is:inline set:html={sectionVars}></style>}
 
     <!-- Set theme before paint, re-apply after each view transition (no flash), and
-         handle the toggle via one delegated listener so it keeps working across swaps -->
+         handle the toggle via one delegated listener so it keeps working across swaps.
+         Also runs the two load-in animations' bookkeeping (see the comments inside). -->
     <script is:inline>
       (() => {
+        const root = document.documentElement;
         const apply = () => {
           const saved = localStorage.getItem('theme');
-          document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+          root.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
         };
         apply();
         if (!window.__themeBound) {
@@ -82,20 +86,62 @@ const sectionVars = cover
           document.addEventListener('click', (e) => {
             const t = e.target instanceof Element ? e.target.closest('#theme-toggle') : null;
             if (!t) return;
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
             localStorage.setItem('theme', next);
           });
+
+          // Header intro (html.intro): the name slides from the middle to the left and the
+          // tabs slide out to the right. Played when the header first appears: on a fresh
+          // load of an inner page, and when arriving from the home cover (which has no
+          // header). The class is cleared once the animation has had time to finish, so
+          // moving between tabs never replays it.
+          let introTimer = 0;
+          const armIntroEnd = () => {
+            clearTimeout(introTimer);
+            introTimer = setTimeout(() => root.classList.remove('intro'), 2000);
+          };
+          window.__playIntro = () => {
+            root.classList.add('intro');
+            if (!root.classList.contains('fonts-pending')) armIntroEnd();
+          };
+          let hadHeader = true;
+          document.addEventListener('astro:before-swap', () => { hadHeader = !!document.querySelector('.site-header'); });
+          document.addEventListener('astro:after-swap', () => {
+            if (!hadHeader && document.querySelector('.site-header')) window.__playIntro();
+          });
+
+          // First load only: hold both load-ins (html.fonts-pending pauses them) until the
+          // display font is ready, so a name never changes typeface halfway through.
+          // Released after 1.2s no matter what, and never set at all without JavaScript.
+          root.classList.add('fonts-pending');
+          const release = () => {
+            if (!root.classList.contains('fonts-pending')) return;
+            root.classList.remove('fonts-pending');
+            if (root.classList.contains('intro')) armIntroEnd();
+          };
+          const wait = () => {
+            const ready = document.fonts
+              ? Promise.all([
+                  document.fonts.load('600 1em "Cormorant Garamond"'),
+                  document.fonts.load('700 1em "Cormorant Garamond"'),
+                ]).then(() => document.fonts.ready)
+              : Promise.resolve();
+            ready.then(release, release);
+          };
+          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wait);
+          else wait();
+          setTimeout(release, 1200);
         }
       })();
     </script>
+    {!cover && <script is:inline>window.__playIntro && window.__playIntro();</script>}
   </head>
   <body data-section={cover ? undefined : (section ?? 'none')} data-fill={fill ? '' : undefined}>
     <a href="#main" class="visually-hidden">Skip to content</a>
     {cover ? <div class="cover-toggle"><ThemeToggle /></div> : <Header />}
     <main id="main">
       <slot />
-      {!cover && onward && <Onward current={section} />}
     </main>
     {!cover && <Footer />}
   </body>

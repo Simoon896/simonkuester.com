@@ -47,7 +47,9 @@ const blobs: BlobCfg[] = [
     position: absolute; left: 0; top: 0; width: var(--sz, 140px); height: var(--sz, 140px);
     margin: calc(var(--sz, 140px) / -2) 0 0 calc(var(--sz, 140px) / -2);
     pointer-events: none; will-change: transform;
+    opacity: 0; /* hidden until the script has placed it (see .is-live), so it never shows stacked in the corner */
   }
+  .blob-field.is-live .bf-blob { opacity: 1; }
   .bf-blob.is-slime { filter: url(#bf-goo); }
   .bf-head, .bf-tail {
     position: absolute; left: 0; top: 0; width: 100%; height: 100%;
@@ -214,8 +216,8 @@ const blobs: BlobCfg[] = [
 
     function enable() {
       if (running) return;
-      if (mqReduce.matches) { staticPlace(); return; }
-      running = true; place(); last = performance.now(); raf = requestAnimationFrame(step);
+      if (mqReduce.matches) { staticPlace(); root!.classList.add('is-live'); return; }
+      running = true; place(); root!.classList.add('is-live'); last = performance.now(); raf = requestAnimationFrame(step);
     }
     function disable() { running = false; cancelAnimationFrame(raf); }
     function evaluate() { mqWide.matches ? enable() : disable(); }

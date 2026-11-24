@@ -97,13 +97,6 @@ img { max-width: 100%; height: auto; }
 }
 .btn:hover { text-decoration: none; opacity: 0.9; }
 
-/* A small ball in a section's colour (set --g on the element or an ancestor) */
-.dot {
-  display: inline-block; width: 0.34em; height: 0.34em; margin-left: 0.12em;
-  background: var(--g); border-radius: 48% 52% 54% 46% / 52% 46% 54% 48%;
-  transition: transform 0.25s ease;
-}
-
 /* Single-screen pages (Contact): header, content centred in what's left, footer */
 body[data-fill] { min-height: 100svh; display: flex; flex-direction: column; }
 body[data-fill] > main { flex: 1 0 auto; display: flex; flex-direction: column; }
@@ -137,13 +130,25 @@ body[data-fill] > footer { margin-top: 0; width: 100%; }
 .prose code { font-family: var(--font-mono); font-size: 0.9em; }
 .prose :not(pre) > code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 5px; }
 
-/* Page transition (Astro View Transitions): a soft, professional cross-fade — the
-   new page fades up while the old fades out. Pure opacity (no transform), so it
-   stays perfectly smooth at any resolution. Reduced-motion gets a clean cut. */
+/* Moving between pages (Astro View Transitions). Three parts move separately:
+   - the header stays exactly where it is,
+   - the dot beside the current tab glides to the new tab and changes colour (it is
+     its own part, named in Header.astro), and
+   - the page content lifts away while the new content rises a few pixels into place.
+   Everything else (the footer, the background) cross-fades. Opacity and short
+   transforms only. Reduced motion gets a clean cut. */
+main { view-transition-name: page; }
+.site-header { view-transition-name: site-header; }
+
 @keyframes vt-fade-out { to { opacity: 0; } }
 @keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-page-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vt-page-in { from { opacity: 0; transform: translateY(18px); } }
 ::view-transition-old(root) { animation: vt-fade-out 0.26s ease both; }
 ::view-transition-new(root) { animation: vt-fade-in 0.42s cubic-bezier(.2, .6, .2, 1) both; }
+::view-transition-old(page) { animation: vt-page-out 0.24s ease both; }
+::view-transition-new(page) { animation: vt-page-in 0.6s cubic-bezier(.22, 1, .36, 1) 0.12s both; }
+::view-transition-group(nav-dot) { animation-duration: 0.6s; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }

@@ -14,6 +14,7 @@ test('about leads with the story and a fact rail', async ({ page }) => {
 test('work lists projects then writing as open rows', async ({ page }) => {
   await page.goto('/work/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Work');
+  await expect(page.locator('main .statement')).toHaveCount(0); // no opening sentence: straight to the list
   const groups = page.locator('main h2');
   await expect(groups.nth(0)).toHaveText('Projects');
   await expect(groups.nth(1)).toHaveText('Writing');
@@ -21,12 +22,23 @@ test('work lists projects then writing as open rows', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Demoing Argus at Identity Week America', exact: true })).toHaveAttribute('href', '/writing/identity-week-america-2026/');
 });
 
-test('work gives pictures real dimensions and leaves out missing ones', async ({ page }) => {
+test('work is a text-only list; pictures live on the project and post pages', async ({ page }) => {
   await page.goto('/work/');
-  await expect(page.locator('img[src="/uploads/project-1.png"]')).toHaveAttribute('width', '905');
-  // the first post has no cover, so its row has no picture
-  const firstPost = page.locator('article', { hasText: 'First post!' });
-  await expect(firstPost.locator('img')).toHaveCount(0);
+  await expect(page.locator('main article')).toHaveCount(4);
+  await expect(page.locator('main img')).toHaveCount(0);
+});
+
+test('no link to the GitHub profile; LinkedIn, email and resume instead', async ({ page }) => {
+  for (const path of ['/about/', '/contact/', '/work/']) {
+    await page.goto(path);
+    await expect(page.locator('a[href="https://github.com/Simoon896"]'), path).toHaveCount(0);
+    await expect(page.locator('.site-footer .social a'), path).toHaveText(['LinkedIn', 'Email', 'Resume', 'RSS']);
+  }
+  await page.goto('/contact/');
+  await expect(page.locator('main')).not.toContainText('GitHub');
+  await expect(page.locator('.elsewhere a')).toHaveCount(2);
+  await expect(page.locator('.elsewhere a').first()).toHaveAttribute('href', 'https://www.linkedin.com/in/simonkuester/');
+  await expect(page.locator('.elsewhere a').last()).toHaveAttribute('href', '/resume.pdf');
 });
 
 for (const old of ['/projects/', '/writing/']) {
@@ -73,10 +85,11 @@ test('project page has a rail with tools and links', async ({ page }) => {
   await expect(page.locator('img.cover')).toHaveAttribute('width', '905');
 });
 
-test('contact is one screen with no onward row', async ({ page }) => {
+test('contact is one screen with a short opening line', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto('/contact/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Contact');
+  await expect(page.locator('.statement')).toHaveText('Get in touch.');
   await expect(page.getByRole('link', { name: 'simonkuester@gmail.com', exact: true })).toHaveAttribute('href', 'mailto:simonkuester@gmail.com');
   await expect(page.locator('nav[aria-label="Other sections"]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
@@ -93,18 +106,21 @@ test('copy button works after a client-side navigation', async ({ page, context 
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('simonkuester@gmail.com');
 });
 
-test('404 offers all three sections', async ({ page }) => {
+test('404 offers a way to every page', async ({ page }) => {
   await page.goto('/no-such-page/');
   await expect(page.locator('.statement')).toHaveText("That page doesn't exist.");
-  await expect(page.locator('nav[aria-label="Other sections"] a')).toHaveText(['About', 'Work', 'Contact']);
+  await expect(page.getByRole('navigation', { name: 'Footer' }).getByRole('link')).toHaveText(['Home', 'About', 'Work', 'Contact']);
 });
 
 for (const path of ['/about/', '/work/', '/contact/']) {
-  test(`header wordmark lines up with the statement on ${path}`, async ({ page }) => {
+  test(`header wordmark lines up with the page's first line on ${path}`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(path);
+    // wait for the header intro to finish: the name starts in the middle and slides left
+    await expect(page.locator('html')).not.toHaveClass(/(^|\s)intro(\s|$)/, { timeout: 6000 });
     const mark = await page.locator('.wordmark').boundingBox();
-    const statement = await page.locator('.statement').boundingBox();
-    expect(Math.abs(mark!.x - statement!.x)).toBeLessThanOrEqual(1);
+    // the opening statement, or on Work (which has none) the first group heading
+    const first = await page.locator('main .statement, main h2').first().boundingBox();
+    expect(Math.abs(mark!.x - first!.x)).toBeLessThanOrEqual(1);
   });
 }

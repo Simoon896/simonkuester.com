@@ -32,9 +32,35 @@ import BlobField from '../components/BlobField.astro';
   .hero-nav a { position: relative; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; }
   .hero-nav a::after { content: ""; position: absolute; left: 0; bottom: -4px; height: 1px; width: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
   .hero-nav a:hover::after, .hero-nav a:focus-visible::after { transform: scaleX(1); }
-  /* center scrim keeps the identity legible over the cards — themed so it never shows a gray blob in light mode */
+  /* Load-in. The cover's text is a downward triangle: the wide name, then the role,
+     the nav and the hint, each narrower than the last. It fills in in that order,
+     top line to bottom point, each line fading in and rising a few pixels. The
+     balls fade up once the blob field has placed them and started moving
+     (.is-live), so they are never seen jumping into position.
+     Kept smooth on purpose: only opacity and transform animate (the browser can do
+     those without redrawing anything; an earlier blur made it stutter), each ball
+     fades as its own layer, and the text waits for the display font
+     (html.fonts-pending, set in BaseLayout) so the name never changes typeface
+     mid-animation. Reduced motion shows everything at once. */
+  @keyframes hero-in { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes ball-in { from { opacity: 0; } }
+  .hero > * { animation: hero-in 1.2s cubic-bezier(.22, 1, .36, 1) both; will-change: opacity, transform; }
+  .hero > :nth-child(1) { animation-delay: .05s; }
+  .hero > :nth-child(2) { animation-delay: .22s; }
+  .hero > :nth-child(3) { animation-delay: .39s; }
+  .hero > :nth-child(4) { animation-delay: .6s; }
+  .cover :global(.blob-field.is-live .bf-blob) { animation: ball-in 1.6s ease .15s both; }
+  .cover :global(.blob-field.is-live .bf-blob:nth-of-type(even)) { animation-delay: .4s; }
+  :global(html.fonts-pending) .hero > * { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero > *, .cover :global(.blob-field.is-live .bf-blob) { animation: none; }
+  }
+  /* center scrim keeps the identity legible over the balls */
   .cover::before { content: ""; position: absolute; inset: 0; z-index: 20; pointer-events: none;
-    background: radial-gradient(38% 32% at 50% 50%, rgba(15,14,12,.9), rgba(15,14,12,.45) 45%, transparent 72%); }
-  :global([data-theme='light']) .cover::before {
-    background: radial-gradient(38% 32% at 50% 50%, rgba(250,249,247,.94), rgba(250,249,247,.55) 45%, transparent 72%); }
+    /* A solid layer in the page colour, cut to a soft oval by the mask. Because it is a
+       plain background-color with the same transition as <body>, it changes with the
+       page when the theme is switched (a gradient would snap and show as an oval). */
+    background-color: var(--paper); transition: background-color 0.2s ease;
+    -webkit-mask-image: radial-gradient(38% 32% at 50% 50%, rgba(0,0,0,.92), rgba(0,0,0,.5) 45%, transparent 72%);
+            mask-image: radial-gradient(38% 32% at 50% 50%, rgba(0,0,0,.92), rgba(0,0,0,.5) 45%, transparent 72%); }
 </style>
