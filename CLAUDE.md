@@ -56,12 +56,12 @@ Built and **deployed live** at https://simonkuester.com. Everything below is shi
 - **June 2026 redesign** — interactive blob-field home cover, inner-page paint splotches, cross-fade transitions.
 - **Nav + theme polish (2026-06-27)** — dropped the redundant Home nav item (the wordmark links home); wordmark is now bold (700), larger (1.25rem) Cormorant serif (the 700 weight is imported in `global.css`); **accent changed from cool blue to warm terracotta** to match the warm palette: `--accent` `#A0522D` (light) / `#DDA07C` (dark) in `global.css`.
 - **Content is real** — About page fully written (`about.astro`: Genix roles, education, origin story, focus areas, outside work); **2 real projects** (`ai-detection-engineering-platform`, `strongdm-argus-integration`, cover images in `public/uploads/`); **first real blog post** (`building-this-site.md`); the old sample posts/projects are gone.
-- **Real links/assets** — LinkedIn is the real URL (Footer + `contact.astro`); `public/resume.pdf` is the real resume (~140KB, 1 page). (The header has no LinkedIn link by design — just wordmark + nav + theme toggle.)
+- **Real links/assets** — LinkedIn is the real URL (Footer + `contact.astro`); `public/resume.pdf` is the real resume (~150KB, 1 page; refreshed Nov 2026 to lead with identity/PAM/NHI work). (The header has no LinkedIn link by design — just wordmark + nav + theme toggle.)
 - **Security/infra** — HTTPS enforced + HSTS; `security.txt` at `public/.well-known/`.
 
 Always keep `test:unit` + `test:e2e` green and `npm run build` clean before pushing (pushing `main` ships to prod).
 
-**November 2026 refresh:** dependencies updated (npm audit clean), the inner pages redesigned (see above), and a second post (`identity-week-america-2026.md`, Identity Week America, Sep 2026, photos in `public/uploads/identity-week-2026/`). Job title everywhere on the site is **"Cybersecurity Engineering Associate"** — `public/resume.pdf` still says "Cybersecurity Associate" until Simon replaces it. Next after the site: updating Simon's LinkedIn profile.
+**November 2026 refresh:** dependencies updated (npm audit clean), the inner pages redesigned (see above), and a second post (`identity-week-america-2026.md`, Identity Week America, Sep 2026, photos in `public/uploads/identity-week-2026/`). Job title everywhere on the site is **"Cybersecurity Engineering Associate"**, including `public/resume.pdf` (its editable source is an untracked `Simon_Kuester_Resume.docx` in the repo root; never commit it). Next after the site: updating Simon's LinkedIn profile.
 
 **Adding content:** a project is `src/content/projects/<slug>.md`, a post is `src/content/posts/<slug>.md` (fields per `src/content.config.ts`; posts can set `coverImage` + `coverAlt`). Put images in `public/uploads/` with hyphenated filenames (the StrongDM cover's space in `strongdm logo.png` is a known wart). Or use `/admin`.
 
