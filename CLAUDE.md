@@ -48,6 +48,7 @@ A dark, full-screen cover: centered **name + role + nav + a "drag and release th
 ## Deployment gotchas (do not "fix" these)
 - **`package-lock.json` is gitignored on purpose.** A Windows-generated lockfile omits Linux-only optional deps and breaks Cloudflare's `npm ci`; without a committed lockfile, Cloudflare uses `npm install`. Don't commit a lockfile.
 - **`.nvmrc` pins Node 22** (Astro 7 needs ≥22.12).
+- **`wrangler.jsonc` (added Nov 2026) controls the deploy.** Without it, Cloudflare auto-configured the Astro build itself and unknown URLs got an empty 404. With it, Cloudflare uploads `dist/` exactly as built: `name` must stay `simonkuester-website` (the connected Worker, or the build fails), and `not_found_handling: "404-page"` serves `404.html`. Real 301s for `/projects/` and `/writing/` come from `public/_redirects`. `src/lib/deploy-config.test.ts` guards all three.
 - `_source-images/` (photo originals/zips) is gitignored — only the optimized copies in `public/uploads/` ship.
 
 ## Current state & next steps

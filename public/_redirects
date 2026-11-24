@@ -1,0 +1,4 @@
+# Projects and Writing were merged into Work (Nov 2026).
+# Project and post pages keep their /projects/<slug>/ and /writing/<slug>/ URLs.
+/projects/ /work/ 301
+/writing/ /work/ 301
