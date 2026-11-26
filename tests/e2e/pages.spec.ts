@@ -11,6 +11,31 @@ test('about leads with the story and a fact rail', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('About');
 });
 
+test('about closes the left column with a contact block level with the end of the text', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/about/');
+  const block = page.locator('.cols .reach');
+  await expect(block).toContainText('Get in touch');
+  await expect(block.getByRole('link', { name: 'simonkuester@gmail.com' })).toHaveAttribute('href', 'mailto:simonkuester@gmail.com');
+  await expect(block.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', 'https://www.linkedin.com/in/simonkuester/');
+  const b = await block.boundingBox();
+  const essay = await page.locator('.cols .essay').boundingBox();
+  const rail = await page.locator('.cols .rail').boundingBox();
+  expect(Math.abs(b!.y + b!.height - (essay!.y + essay!.height))).toBeLessThanOrEqual(4); // ends where the text ends
+  expect(Math.abs(b!.x - rail!.x)).toBeLessThanOrEqual(1); // same left edge as the fact sheet
+  // the fact sheet still follows you down the page, and never slides over the block
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const railEnd = await page.locator('.cols .rail').boundingBox();
+  const blockEnd = await block.boundingBox();
+  expect(railEnd!.y + railEnd!.height).toBeLessThanOrEqual(blockEnd!.y);
+});
+
+test('about contact block is left out on small screens, where the footer is right below', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 900 });
+  await page.goto('/about/');
+  await expect(page.locator('.cols .reach')).toBeHidden();
+});
+
 test('work lists projects then writing as open rows', async ({ page }) => {
   await page.goto('/work/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Work');
@@ -24,7 +49,8 @@ test('work lists projects then writing as open rows', async ({ page }) => {
 
 test('work is a text-only list; pictures live on the project and post pages', async ({ page }) => {
   await page.goto('/work/');
-  await expect(page.locator('main article')).toHaveCount(4);
+  // two projects and at least the first two posts; a new weekly post adds a row
+  expect(await page.locator('main article').count()).toBeGreaterThanOrEqual(4);
   await expect(page.locator('main img')).toHaveCount(0);
 });
 

@@ -26,15 +26,29 @@ const certs = ['CompTIA Security+', 'StrongDM Deployment Expert', 'CompTIA A+'];
     <p class="statement">I'm a cybersecurity engineering associate at Genix Cyber, working on identity and access management for both people and AI agents.</p>
 
     <div class="cols">
-      <aside class="rail" aria-label="At a glance">
-        <dl>
-          <div><dt>Role</dt><dd>{role}</dd></div>
-          <div><dt>Company</dt><dd>Genix Cyber</dd></div>
-          <div><dt>Education</dt><dd>B.S. in Cybersecurity, University of North Georgia (2025, 3.84 GPA)</dd></div>
-          <div><dt>Certifications</dt><dd><ul>{certs.map((c) => <li>{c}</li>)}</ul></dd></div>
-        </dl>
-        <p class="after"><a class="btn" href="/resume.pdf">Download resume (PDF)</a></p>
-      </aside>
+      {/* Left column: the fact sheet follows you down the page, and a small contact
+          block sits at the very bottom, level with the end of the text, so the
+          column isn't left empty under the fact sheet at the end of the page. */}
+      <div class="side">
+        <div class="rail-hold">
+          <aside class="rail" aria-label="At a glance">
+            <dl>
+              <div><dt>Role</dt><dd>{role}</dd></div>
+              <div><dt>Company</dt><dd>Genix Cyber</dd></div>
+              <div><dt>Education</dt><dd>B.S. in Cybersecurity, University of North Georgia (2025, 3.84 GPA)</dd></div>
+              <div><dt>Certifications</dt><dd><ul>{certs.map((c) => <li>{c}</li>)}</ul></dd></div>
+            </dl>
+            <p class="after"><a class="btn" href="/resume.pdf">Download resume (PDF)</a></p>
+          </aside>
+        </div>
+        <div class="reach">
+          <p class="label">Get in touch</p>
+          <ul>
+            <li><a href="mailto:simonkuester@gmail.com">simonkuester@gmail.com</a></li>
+            <li><a href="https://www.linkedin.com/in/simonkuester/">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
 
       <div class="essay">
         <p>Day to day, I work on Argus, our converged cybersecurity platform. It brings threat
@@ -70,6 +84,17 @@ const certs = ['CompTIA Security+', 'StrongDM Deployment Expert', 'CompTIA A+'];
 
 <style>
   .essay p { margin: 0 0 var(--space-3); }
+  .essay > p:last-child { margin-bottom: 0; } /* so the text and the contact block end on the same line */
+
+  /* the left column runs the full height of the text; the fact sheet sticks inside
+     the top part (.rail-hold), so it stops above the contact block and never covers it */
+  .side { display: flex; flex-direction: column; }
+  .rail-hold { flex: 1; }
+  .reach { padding-top: 3rem; font-size: 0.95rem; line-height: 1.5; }
+  .reach .label { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.1rem; }
+  .reach ul { list-style: none; margin: 0; padding: 0; }
+  .reach a { overflow-wrap: anywhere; }
+  @media (max-width: 900px) { .reach { display: none; } } /* one column: the footer's links are right below */
   .jobs { list-style: none; margin: 0; padding: 0; }
   .jobs li + li { margin-top: 2rem; }
   .jobs h3 {
